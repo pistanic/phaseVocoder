@@ -21,7 +21,7 @@
 
 //==============================================================================
 /***/
-class phaseVocoAudioProcessorEditor  : public AudioProcessorEditor, private Slider::Listener, private ComboBox::Listener
+class phaseVocoAudioProcessorEditor  : public AudioProcessorEditor, private Slider::Listener, private ComboBox::Listener, private Button::Listener
 {
 public:
     phaseVocoAudioProcessorEditor (phaseVocoAudioProcessor&);
@@ -38,7 +38,7 @@ public:
 private:
     phaseVocoAudioProcessor& processor;
 	
-	Rectangle<int> rectArea[11];
+	Rectangle<int> rectArea[12];
 	
     Slider slOutGain;
 	Label labelGain;
@@ -49,8 +49,12 @@ private:
 	ComboBox comBoxNote0;
 	Label	labelNote0;
 
+	ToggleButton togshiftupdown;
+	Label labTogButton;
+
     void sliderValueChanged(Slider* slider) override;
 	void comboBoxChanged(ComboBox* comboBox) override;
+	void buttonClicked(Button* button) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (phaseVocoAudioProcessorEditor)
 };

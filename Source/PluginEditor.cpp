@@ -23,6 +23,11 @@ phaseVocoAudioProcessorEditor::phaseVocoAudioProcessorEditor (phaseVocoAudioProc
 	sliderValueChanged(&slOutGain);
 	labelGain.setText("Output Gain : ", dontSendNotification);
 	labelGain.attachToComponent(&slOutGain, false);
+
+	addAndMakeVisible(togshiftupdown);
+	togshiftupdown.addListener(this);
+	labTogButton.setText("Check to shift pitch up : ", dontSendNotification);
+	labTogButton.attachToComponent(&togshiftupdown, true);
 	
 
 	labelRoot.setText("Choose the Root Note : ", dontSendNotification);
@@ -53,7 +58,7 @@ void phaseVocoAudioProcessorEditor::paint (Graphics& g)
     g.fillAll(Colours::navy);    
     g.setColour (Colours::hotpink);
 	g.setFont (12.0f);
-	for (int i = 0; i < 11; i++)
+	for (int i = 0; i < 12; i++)
 	{
 		g.drawRect(rectArea[i]);
 	}
@@ -67,7 +72,8 @@ void phaseVocoAudioProcessorEditor::resized()
     //comBoxnumNotes.setBounds(rectArea[2]);
     //comBoxPreset.setBounds(rectArea[3]);
 	slOutGain.setBounds(rectArea[10]);
-    comBoxNote0.setBounds(rectArea[7]);
+    comBoxNote0.setBounds(rectArea[4]);
+	togshiftupdown.setBounds(rectArea[11]);
 }
 
 void phaseVocoAudioProcessorEditor::sliderValueChanged(Slider* slider)
@@ -96,18 +102,13 @@ void phaseVocoAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox)
 	}
 }
 
-//void phaseVocoAudioProcessorEditor::buttonClicked(Button* button)
-//{
-//    if (button->getName() == "Peak")
-//    {
-//        processor.detMode = PEAK;
-//    }
-//    else if (button->getName() == "RMS")
-//    {
-//        processor.detMode = RMS;
-//    }
-//    
-//}
+void phaseVocoAudioProcessorEditor::buttonClicked(Button* button)
+{
+	if (button == &togshiftupdown)
+	{
+		processor.m_togState = button->getToggleState();
+	}    
+}
 
 //void phaseVocoAudioProcessorEditor::timerCallback()
 //{
@@ -165,9 +166,10 @@ void phaseVocoAudioProcessorEditor::calcRectAreas()
 	rectArea[2] = x.removeFromLeft(x.getWidth() / 3);
 	rectArea[2] = rectArea[2].removeFromBottom(rectArea[2].getHeight() * 9 / 10);
 	rectArea[2] = rectArea[2].removeFromTop(rectArea[2].getHeight() * 6 / 10);
-	rectArea[3] = x.removeFromLeft(x.getWidth() / 2);
-	rectArea[3] = rectArea[3].removeFromBottom(rectArea[3].getHeight() * 9 / 10);
-	rectArea[3] = rectArea[3].removeFromTop(rectArea[3].getHeight() * 6 / 10);
+	rectArea[11] = x.removeFromLeft(x.getWidth() / 2);
+	rectArea[11] = rectArea[11].removeFromBottom(rectArea[11].getHeight() * 9 / 10);
+	rectArea[3] = rectArea[11].removeFromTop(rectArea[11].getHeight() * 6 / 10);
+	rectArea[11] = rectArea[11].removeFromTop(rectArea[11].getHeight() * 5 / 10);
 	rectArea[10] = x;
 	rectArea[10] = rectArea[10].removeFromBottom(rectArea[10].getHeight() * 9 / 10);
 	rectArea[10] = rectArea[10].removeFromTop(rectArea[10].getHeight() * 8 / 10);

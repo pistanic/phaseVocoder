@@ -71,7 +71,8 @@ public:
     float curOutGain;
 	
 	int m_root, m_note0;
-
+	bool m_togState;
+	   
     float curSampleVal;
    
 	private:
