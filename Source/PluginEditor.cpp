@@ -19,8 +19,11 @@ phaseVocoAudioProcessorEditor::phaseVocoAudioProcessorEditor (phaseVocoAudioProc
 {
     setSize (600, 400);
 
-    initSlider(&slOutGain, Slider::LinearVertical, "Gain", Slider::TextBoxAbove, false, " db", -20.0, 12.0, 0.1, 0.0);
+    initSlider(&slOutGain, Slider::LinearVertical, "Gain", Slider::TextBoxBelow, false, " db", -20.0, 12.0, 0.1, 0.0);
 	sliderValueChanged(&slOutGain);
+	labelGain.setText("Output Gain : ", dontSendNotification);
+	labelGain.attachToComponent(&slOutGain, false);
+	
 
 	labelRoot.setText("Choose the Root Note : ", dontSendNotification);
 	labelRoot.attachToComponent(&comBoxRoot, false);
@@ -47,9 +50,13 @@ phaseVocoAudioProcessorEditor::~phaseVocoAudioProcessorEditor()
 //==============================================================================
 void phaseVocoAudioProcessorEditor::paint (Graphics& g)
 {
-    g.fillAll(Colours::darkslategrey);    
-    g.setColour (Colours::maroon);
+    g.fillAll(Colours::navy);    
+    g.setColour (Colours::hotpink);
 	g.setFont (12.0f);
+	for (int i = 0; i < 11; i++)
+	{
+		g.drawRect(rectArea[i]);
+	}
     //g.drawFittedText("Output Gain", 485, 30, 70, 50, Justification::left, 1);   
 }
 
@@ -60,7 +67,7 @@ void phaseVocoAudioProcessorEditor::resized()
     //comBoxnumNotes.setBounds(rectArea[2]);
     //comBoxPreset.setBounds(rectArea[3]);
 	slOutGain.setBounds(rectArea[10]);
-    comBoxNote0.setBounds(rectArea[4]);
+    comBoxNote0.setBounds(rectArea[7]);
 }
 
 void phaseVocoAudioProcessorEditor::sliderValueChanged(Slider* slider)
@@ -163,19 +170,33 @@ void phaseVocoAudioProcessorEditor::calcRectAreas()
 	rectArea[3] = rectArea[3].removeFromTop(rectArea[3].getHeight() * 6 / 10);
 	rectArea[10] = x;
 	rectArea[10] = rectArea[10].removeFromBottom(rectArea[10].getHeight() * 9 / 10);
+	rectArea[10] = rectArea[10].removeFromTop(rectArea[10].getHeight() * 8 / 10);
 	
 	x = y.removeFromTop(y.getHeight() / 2);
 	rectArea[4] = x.removeFromLeft(x.getWidth() / 3);
-	rectArea[4] = rectArea[4].removeFromBottom(rectArea[4].getHeight() * 9 / 10);
+	rectArea[4] = rectArea[4].removeFromBottom(rectArea[4].getHeight() * 8 / 10);
 	rectArea[4] = rectArea[4].removeFromTop(rectArea[4].getHeight() * 9 / 10);
 
-	/*
+	
 	rectArea[5] = x.removeFromLeft(x.getWidth() / 2);
+	rectArea[5] = rectArea[5].removeFromBottom(rectArea[5].getHeight() * 8 / 10);
+	rectArea[5] = rectArea[5].removeFromTop(rectArea[5].getHeight() * 9 / 10);
+
 	rectArea[6] = x;
+	rectArea[6] = rectArea[6].removeFromBottom(rectArea[6].getHeight() * 8 / 10);
+	rectArea[6] = rectArea[6].removeFromTop(rectArea[6].getHeight() * 9 / 10);
 
 	x = y;
 	rectArea[7] = x.removeFromLeft(x.getWidth() / 3);
+	rectArea[7] = rectArea[7].removeFromBottom(rectArea[7].getHeight() * 8 / 10);
+	rectArea[7] = rectArea[7].removeFromTop(rectArea[7].getHeight() *  9 / 10);
+
 	rectArea[8] = x.removeFromLeft(x.getWidth() / 2);
+	rectArea[8] = rectArea[8].removeFromBottom(rectArea[8].getHeight() * 8 / 10);
+	rectArea[8] = rectArea[8].removeFromTop(rectArea[8].getHeight() * 9 / 10);
+
 	rectArea[9] = x;
-	*/
+	rectArea[9] = rectArea[9].removeFromBottom(rectArea[9].getHeight() * 8 / 10);
+	rectArea[9] = rectArea[9].removeFromTop(rectArea[9].getHeight() * 9 / 10);
+
 }

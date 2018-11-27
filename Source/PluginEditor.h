@@ -41,6 +41,7 @@ private:
 	Rectangle<int> rectArea[11];
 	
     Slider slOutGain;
+	Label labelGain;
 
 	ComboBox comBoxRoot;
 	Label	labelRoot;
