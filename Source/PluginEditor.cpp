@@ -17,37 +17,25 @@
 phaseVocoAudioProcessorEditor::phaseVocoAudioProcessorEditor (phaseVocoAudioProcessor& p)
 : AudioProcessorEditor (&p), processor (p)
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
-    setSize (600, 570);
-    
-    //Initialize slider properties with custom function
-    //initSlider(&slInGain, Slider::LinearVertical, "Input Gain", Slider::TextBoxAbove, false, " db", -12.0, 12.0, 0.1, 0.0);
-    //initSlider(&slRatio, Slider::RotaryHorizontalVerticalDrag, "Ratio", Slider::TextBoxAbove, false, ":1", 1.0, 40.0, 1.0, 1.0);
-	//initSlider(&slThreshold, Slider::LinearVertical, "Threshold", Slider::TextBoxAbove, false, " db", -60.0, 0.0, 0.15, 0.0);
-    //initSlider(&slAtkTime, Slider::RotaryHorizontalVerticalDrag, "Attack", Slider::TextBoxAbove, false, " ms", 0.0, 250.0, 0.5, 0.0);
-    //initSlider(&slRelTime, Slider::RotaryHorizontalVerticalDrag, "Release", Slider::TextBoxAbove, false, " ms", 0.0, 250.0, 0.5, 0.0);
+    setSize (600, 400);
+
     initSlider(&slOutGain, Slider::LinearVertical, "Gain", Slider::TextBoxAbove, false, " db", -20.0, 12.0, 0.1, 0.0);
-    //initSlider(&slLevel, Slider::RotaryHorizontalVerticalDrag, "Level", Slider::TextBoxAbove, true, "", 0.0, 2.0, 0.01, 0.0, false);
-    
-    //Initialize buttons
-    //initButton(&btnPeak, "Peak", DETECTION_GROUP);
-    //initButton(&btnRMS, "RMS", DETECTION_GROUP);
-    
-    
-    //Trigger initial slider values
-    //sliderValueChanged(&slInGain);
-    //sliderValueChanged(&slRatio);
-    //sliderValueChanged(&slThreshold);
-    sliderValueChanged(&slOutGain);
-    //sliderValueChanged(&slAtkTime);
-    //sliderValueChanged(&slRelTime);
-    
-    //trigger button
-    //btnPeak.triggerClick();
-    
-    //startTimer(10); //begin timer with a 10ms callback
-    
+	sliderValueChanged(&slOutGain);
+
+	labelRoot.setText("Choose the Root Note : ", dontSendNotification);
+	labelRoot.attachToComponent(&comBoxRoot, false);
+	comBoxRoot.addItemList({ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}, 1);
+	comBoxRoot.setSelectedItemIndex(0, false);
+	addAndMakeVisible(comBoxRoot);
+	
+	labelNote0.setText("Choose Note - 0 : ", dontSendNotification);
+	labelNote0.attachToComponent(&comBoxNote0, false);
+	comBoxNote0.addItemList({ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" }, 1);
+	comBoxNote0.setSelectedItemIndex(0, false);
+	addAndMakeVisible(comBoxNote0);
+
+    //initButton(&btnPeak, "Peak", DETECTION_GROUP);]
+    //btnPeak.triggerClick();    
 }
 
 phaseVocoAudioProcessorEditor::~phaseVocoAudioProcessorEditor()
@@ -57,71 +45,48 @@ phaseVocoAudioProcessorEditor::~phaseVocoAudioProcessorEditor()
 //==============================================================================
 void phaseVocoAudioProcessorEditor::paint (Graphics& g)
 {
-//    g.fillAll (Colours::black);
-    g.fillAll(Colour::Colour(45, 45, 45));
-    
-    g.setColour (Colours::white);
-//    g.setFont (12.0f);
-//    std::string displayTime = "Last Updated: " + std::string(__DATE__) + " at " + std::string(__TIME__);
-//    g.drawFittedText(displayTime, 0, 1, getWidth(), 50, Justification::centred, 1);
-    //g.drawFittedText("Slope", 20, 30, 70, 50, Justification::left, 1);
-    g.setFont(15.0f);
-    /*g.drawFittedText("Input Gain", 10, 30, 90, 50, Justification::left, 1);
-    g.drawFittedText("Ratio", 120, 30, 70, 50, Justification::left, 1);
-    g.drawFittedText("Detection Mode", 230, 30, 100, 50, Justification::left, 1);
-    g.drawFittedText("Threshold", 375, 30, 70, 50, Justification::left, 1);*/
-    g.drawFittedText("Output Gain", 485, 30, 70, 50, Justification::left, 1);
-    
-    /*g.drawFittedText("Attack", 115, 165, 60, 30, Justification::left, 1);
-    g.drawFittedText("Release", 190, 165, 60, 30, Justification::left, 1);
-    
-    g.drawFittedText("Output RMS", 250, 300, 100, 20, Justification::centred, 1);*/
-    
+    g.fillAll(Colours::darkslategrey);    
+    g.setColour (Colours::maroon);
+	g.setFont (12.0f);
+    //g.drawFittedText("Output Gain", 485, 30, 70, 50, Justification::left, 1);   
 }
 
 void phaseVocoAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
-    /*slInGain.setBounds(10, 80, 90, 200);
-    slRatio.setBounds(120, 80, 80, 80);
-    slThreshold.setBounds(370, 80, 90, 200);*/
-    slOutGain.setBounds(480, 80, 90, 200);
-    /*slAtkTime.setBounds(115, 200, 70, 70);
-    slRelTime.setBounds(190, 200, 70, 70);
-    btnPeak.setBounds(230, 80, 100, 20);
-    btnRMS.setBounds(230, 110, 100, 20);
-    slLevel.setBounds(200, 340, 200, 200);*/
+	calcRectAreas();
+    comBoxRoot.setBounds(rectArea[1]);
+    //comBoxnumNotes.setBounds(rectArea[2]);
+    //comBoxPreset.setBounds(rectArea[3]);
+	slOutGain.setBounds(rectArea[10]);
+    comBoxNote0.setBounds(rectArea[4]);
 }
 
 void phaseVocoAudioProcessorEditor::sliderValueChanged(Slider* slider)
 {
     String slName = slider->getName();
     
-    if (slName == "Input Gain")
+    if (slName == "# of Notes")
     {
-        //processor.curInGain = slider->getValue();
+        //processor.numNotes = slider->getValue();
     }
-    else if (slName == "Ratio")
-    {
-        //processor.curRatio = slider->getValue();
-    }
-    else if (slName == "Threshold")
-    {
-        //processor.curThresh = slider->getValue();
-    }
-    else if (slName == "Gain")
-    {
-        processor.curOutGain = slider->getValue();
-    }
-    else if (slName == "Attack")
-    {
-        //processor.curAtkTime = slider->getValue() / 1000.0f;
-    }
-    else if (slName == "Release")
-    {
-        //processor.curRelTime = slider->getValue() / 1000.0f;
-    }
+	else if (slName == "Gain")
+	{
+		processor.curOutGain = slider->getValue();
+	}
+}
+
+void phaseVocoAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox)
+{
+	String cmName = comboBox->getName();
+	
+	if (cmName == "Root")
+	{
+		processor.m_root = comboBox->getSelectedItemIndex();
+	}
+	else if (cmName == "Note0")
+	{
+		processor.m_note0 = comboBox->getSelectedItemIndex();
+	}
 }
 
 //void phaseVocoAudioProcessorEditor::buttonClicked(Button* button)
@@ -159,19 +124,12 @@ void phaseVocoAudioProcessorEditor::initSlider(Slider* slider, Slider::SliderSty
     slider->setColour(Slider::thumbColourId, Colours::deepskyblue);
     slider->setColour(Slider::textBoxHighlightColourId, Colours::red);
     
-    //for rotary sliders only
-    if  ((newStyle == Slider::RotaryHorizontalVerticalDrag) || (newStyle == Slider::RotaryHorizontalDrag) || (newStyle = Slider::RotaryVerticalDrag))
-    {
-        slider->setColour(Slider::rotarySliderFillColourId, Colours::deepskyblue);
-        slider->setColour(Slider::rotarySliderOutlineColourId, Colours::deepskyblue);
-    }
-    
     addAndMakeVisible(slider);
+
     if (addListener == true)
     {
         slider->addListener(this);
-    }
-    
+    }    
 }
 
 //void phaseVocoAudioProcessorEditor::initButton(Button* btn, String btnName, int buttonGroup)
@@ -184,3 +142,40 @@ void phaseVocoAudioProcessorEditor::initSlider(Slider* slider, Slider::SliderSty
 //    btn->setColour(ToggleButton::tickColourId, Colours::deepskyblue);
 //    btn->setRadioGroupId(buttonGroup);
 //}
+
+void phaseVocoAudioProcessorEditor::calcRectAreas()
+{
+	Rectangle<int> y = getLocalBounds().reduced(10);
+	Rectangle<int> x = y;
+
+	rectArea[0] = x;
+
+	//FIRST COLUMN - BPM, SCALE, TAPS, START-Button
+	x = y.removeFromTop(y.getHeight() / 2);
+	rectArea[1] = x.removeFromLeft(x.getWidth() / 4);
+	rectArea[1] = rectArea[1].removeFromBottom(rectArea[1].getHeight() * 9 / 10 );
+	rectArea[1] = rectArea[1].removeFromTop(rectArea[1].getHeight() * 6 / 10 );
+	rectArea[2] = x.removeFromLeft(x.getWidth() / 3);
+	rectArea[2] = rectArea[2].removeFromBottom(rectArea[2].getHeight() * 9 / 10);
+	rectArea[2] = rectArea[2].removeFromTop(rectArea[2].getHeight() * 6 / 10);
+	rectArea[3] = x.removeFromLeft(x.getWidth() / 2);
+	rectArea[3] = rectArea[3].removeFromBottom(rectArea[3].getHeight() * 9 / 10);
+	rectArea[3] = rectArea[3].removeFromTop(rectArea[3].getHeight() * 6 / 10);
+	rectArea[10] = x;
+	rectArea[10] = rectArea[10].removeFromBottom(rectArea[10].getHeight() * 9 / 10);
+	
+	x = y.removeFromTop(y.getHeight() / 2);
+	rectArea[4] = x.removeFromLeft(x.getWidth() / 3);
+	rectArea[4] = rectArea[4].removeFromBottom(rectArea[4].getHeight() * 9 / 10);
+	rectArea[4] = rectArea[4].removeFromTop(rectArea[4].getHeight() * 9 / 10);
+
+	/*
+	rectArea[5] = x.removeFromLeft(x.getWidth() / 2);
+	rectArea[6] = x;
+
+	x = y;
+	rectArea[7] = x.removeFromLeft(x.getWidth() / 3);
+	rectArea[8] = x.removeFromLeft(x.getWidth() / 2);
+	rectArea[9] = x;
+	*/
+}
