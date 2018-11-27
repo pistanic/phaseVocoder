@@ -26,12 +26,14 @@ phaseVocoAudioProcessorEditor::phaseVocoAudioProcessorEditor (phaseVocoAudioProc
 	labelRoot.attachToComponent(&comBoxRoot, false);
 	comBoxRoot.addItemList({ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}, 1);
 	comBoxRoot.setSelectedItemIndex(0, false);
+	comBoxRoot.addListener(this);
 	addAndMakeVisible(comBoxRoot);
 	
 	labelNote0.setText("Choose Note - 0 : ", dontSendNotification);
 	labelNote0.attachToComponent(&comBoxNote0, false);
 	comBoxNote0.addItemList({ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" }, 1);
 	comBoxNote0.setSelectedItemIndex(0, false);
+	comBoxNote0.addListener(this);
 	addAndMakeVisible(comBoxNote0);
 
     //initButton(&btnPeak, "Peak", DETECTION_GROUP);]
@@ -76,14 +78,12 @@ void phaseVocoAudioProcessorEditor::sliderValueChanged(Slider* slider)
 }
 
 void phaseVocoAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox)
-{
-	String cmName = comboBox->getName();
-	
-	if (cmName == "Root")
+{	
+	if (comboBox == &comBoxRoot)
 	{
 		processor.m_root = comboBox->getSelectedItemIndex();
 	}
-	else if (cmName == "Note0")
+	else if (comboBox == &comBoxNote0)
 	{
 		processor.m_note0 = comboBox->getSelectedItemIndex();
 	}
