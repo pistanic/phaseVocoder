@@ -11,13 +11,14 @@
 #ifndef PLUGINPROCESSOR_H_INCLUDED
 #define PLUGINPROCESSOR_H_INCLUDED
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif // _M_PI_
+
+//typedef float fft_complex[2];
+
 #include <vector>
 #include "../JuceLibraryCode/JuceHeader.h"
-
-
-#ifndef M_PI
-	#define M_PI 3.14159265358979323846
-#endif // _M_PI_
 
 enum windowType
 {
@@ -97,8 +98,8 @@ public:
    
 	private:
 		// Private member functions 
-		//void initFFT(int length);
-		//void deinitFFT();
+		void initFFT(int length);
+		void deinitFFT();
 
 		void initWindow(int length, int windowType);
 		void deinitWindow();
@@ -149,6 +150,15 @@ public:
 		int m_inputBufferWritePosition; 
 		int m_outputBufferWritePosition;
 		int m_outputBufferReadPosition; 
+
+		// fft arrays
+		dsp::Complex<float> m_fftTimeDomain[1024]; // fftTransformSize
+		dsp::Complex<float> m_fftFrequencyDomain[1024]; // fftTransformSize
+
+		// fft classes
+		int const mk_fftOrder = 10;
+		dsp::FFT m_forwardFFT;
+		dsp::FFT m_reverseFFT;
 
 		// Bool checks
 		bool m_fftInit, m_preparedToPlay;
