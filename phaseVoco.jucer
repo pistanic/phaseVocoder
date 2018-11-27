@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="UNc3Ev" name="phaseVoco" projectType="audioplug" jucerVersion="5.3.2">
+<JUCERPROJECT id="UNc3Ev" name="phaseVoco" projectType="audioplug" jucerVersion="5.3.2"
+              pluginFormats="buildStandalone">
   <MAINGROUP id="raIjIs" name="phaseVoco">
     <GROUP id="{032B20DA-8175-594D-6993-F4627528F920}" name="Source">
       <FILE id="X18dcT" name="PluginProcessor.cpp" compile="1" resource="0"

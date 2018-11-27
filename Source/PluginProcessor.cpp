@@ -12,6 +12,7 @@
 #include "PluginEditor.h"
 
 
+
 //==============================================================================
 phaseVocoAudioProcessor::phaseVocoAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -25,6 +26,69 @@ phaseVocoAudioProcessor::phaseVocoAudioProcessor()
                   )
 #endif
 {
+	
+	m_fftSize = 1024; 
+	m_fftTransformSize = 0;
+	m_samplesSinceFFT = 0; 
+	m_fftScaleFactor = 0; 
+
+	m_hopSize = eighthWindow;
+	m_windowType = hann;
+	m_windowBufferPointer = 0; 
+
+	m_synthWindowSize = 1024;
+	m_synthWindowBufferPointer = 0; 
+
+	m_pitchShift = c; // No shift
+	m_pitchShiftValue = 1.0;
+	m_oneOverPitchShift = 1.0; 
+
+	m_ratio = 1.0; 
+
+	int omegaFactor = 0; 
+
+	switch (m_hopSize)
+	{
+		case window:
+		{
+			omegaFactor = 2;
+			break;
+		}
+		case halfWindow:
+		{
+			omegaFactor = 1;
+			break;
+		}
+		case quarterWindow:
+		{
+			omegaFactor = 0.5;
+			break;
+		}
+		case eighthWindow:
+			omegaFactor = 0.25;
+			break;
+		default:
+		{
+			omegaFactor = 0;
+			break;
+		}
+	}
+
+	for (int i = 0; i < 2*m_fftSize; ++i)
+	{
+		m_omega.push_back(omegaFactor * M_PI*i); 
+	}
+	
+	m_inputBufferSize = 1;
+	m_outputBufferSize = 1;
+
+	m_inputBufferWritePosition = 0;
+	m_outputBufferWritePosition = 0; 
+	m_outputBufferReadPosition = 0; 
+
+	m_fftInit = m_preparedToPlay = true;
+	
+	
 }
 
 phaseVocoAudioProcessor::~phaseVocoAudioProcessor()
