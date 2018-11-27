@@ -110,7 +110,8 @@ public:
 		void updateScaleFactor();
 		
 		// Private member variables
-		int m_fftSize, m_hopSize;
+		int m_fftSize;
+		int m_hopSize, m_hopSelectSize;
 		int m_fftTransformSize; 
 		int m_samplesSinceFFT;
 

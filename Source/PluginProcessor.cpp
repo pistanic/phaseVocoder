@@ -32,7 +32,7 @@ phaseVocoAudioProcessor::phaseVocoAudioProcessor()
 	m_samplesSinceFFT = 0; 
 	m_fftScaleFactor = 0; 
 
-	m_hopSize = eighthWindow;
+	m_hopSelectSize = eighthWindow;
 	m_windowType = hann;
 	m_windowBufferPointer = 0; 
 
@@ -333,11 +333,55 @@ void phaseVocoAudioProcessor::deinitSynthWindow()
 
 void phaseVocoAudioProcessor::updateHopSize()
 {
+	switch (m_hopSelectSize)
+	{
+		case window :
+			m_hopSize = m_fftTransformSize;
+			break;
+		case halfWindow :
+			m_hopSize = m_fftTransformSize / 2;
+			break;
+		case quarterWindow :
+			m_hopSize = m_fftTransformSize / 4;
+			break;
+		case eighthWindow :
+			m_hopSize = m_fftTransformSize / 8;
+			break;
+	}
 
+	updateScaleFactor();
+	m_outputBufferWritePosition = m_hopSize + m_fftTransformSize;
 }
 
 void phaseVocoAudioProcessor::updateScaleFactor()
 {
+	double windowSum = 0.0;
+
+	for (int i = 0; i < m_windowBufferSize; ++i)
+	{
+		windowSum += m_windowBufferPointer[i];
+	}
+
+	if (windowSum == 0.0)
+		m_fftScaleFactor = 0.0; 
+	else
+	{
+		switch (m_hopSelectSize)
+		{
+			case window : 
+				m_fftScaleFactor = 1.0 / (double)windowSum;
+				break;
+			case halfWindow :
+				m_fftScaleFactor = 0.5 / (double)windowSum;
+				break;
+			case quarterWindow :
+				m_fftScaleFactor = 0.25 / (double)windowSum;
+				break;
+			case eighthWindow :
+				m_fftScaleFactor = 0.125 / (double)windowSum;
+				break;
+		}
+	}
 
 }
 
