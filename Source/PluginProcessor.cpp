@@ -132,6 +132,7 @@ void phaseVocoAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
     // initialisation that you need..
 
 	//set reset phase information
+	/*
 	for (int i = 0; i < 2048; ++i)
 	{
 		m_omega[i] = 2 * M_PI*i* m_hopSize / m_fftTransformSize;
@@ -142,7 +143,7 @@ void phaseVocoAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
 			m_psi[i][j] = 0; 
 		}
 	}
-
+	*/
 	initFFT(m_fftSize);
 	initWindow(m_fftSize, m_windowType);
 	initSynthWindow(floor(m_fftSize*m_oneOverPitchShift), m_windowType);
@@ -190,21 +191,10 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
     const int totalNumInputChannels  = getTotalNumInputChannels();
     const int totalNumOutputChannels = getTotalNumOutputChannels();
     
-	int numSamples = buffer.getNumSamples();
+	int const numSamples = buffer.getNumSamples();
 
 	int channel, inputWritePosition, samplesSinceFFT;
 	int outputWritePosition, outputReadPosition;
-
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
-    for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-    {
-        buffer.clear (i, 0, buffer.getNumSamples());
-    }
 
 	//float linOutGain = powf(10, curOutGain / 20.0);
     
@@ -221,7 +211,7 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
 	}
 
     //go through each channel for the current frame
-    for (int ch = 0; ch < totalNumInputChannels; ++ch)
+    for (channel = 0; channel < totalNumInputChannels; ++channel)
     {
 		//int const k_fftTransformSize = 1024; // m_fftTransformSize;
 		//double const k_oneOverPitchShift = m_oneOverPitchShift;
@@ -234,7 +224,9 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
 		double dx;
 		int ix;
 		
+		// Single channel input data
 		float* channelData = buffer.getWritePointer(channel);
+		// Circular Buffers 
 		float* inputBufferData = m_inputBuffer.getWritePointer(jmin (channel, (m_inputBuffer.getNumChannels() - 1)));
 		float* outputBufferData = m_outputBuffer.getWritePointer(jmin (channel, (m_inputBuffer.getNumChannels() - 1)));
 		
@@ -246,13 +238,13 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
 		for (int i = 0; i < numSamples; ++i)
 		{
 			float const in = channelData[i];
+
 			channelData[i] = outputBufferData[outputReadPosition];
-			
+			outputBufferData[outputReadPosition] = 0.0;
 			if (++outputReadPosition >= m_outputBufferSize)
 				outputReadPosition = 0;
 			
 			inputBufferData[inputWritePosition] = in;
-			
 			if (++inputWritePosition >= m_inputBufferSize)
 				inputWritePosition = 0;
 			if (++samplesSinceFFT >= m_hopSize)
@@ -267,10 +259,10 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
 				// Set img to 0 real to window buffer
 				for (int fftBufferIndex = 0; fftBufferIndex < m_fftTransformSize; ++fftBufferIndex)
 				{
-					m_fftTimeDomain[fftBufferIndex].imag(0);
+					m_fftTimeDomain[fftBufferIndex].imag(0.0);
 					
 					if (fftBufferIndex >= m_windowBufferSize) // saftey check
-						m_fftTimeDomain[fftBufferIndex].real(0);
+						m_fftTimeDomain[fftBufferIndex].real(0.0);
 					else
 						m_fftTimeDomain[fftBufferIndex].real(m_windowBufferPointer[fftBufferIndex]
 																*inputBufferData[inputBufferIndex]);
@@ -284,7 +276,7 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
 				// ~`* P H A S E V O C O C O *`~
 				for (int i = 0; i < m_fftTransformSize; ++i)
 				{
-					double amp = sqrt((m_fftFrequencyDomain[i].real() * m_fftFrequencyDomain[i].real()) * (m_fftFrequencyDomain[i].imag() 
+					double amp = sqrt((m_fftFrequencyDomain[i].real() * m_fftFrequencyDomain[i].real()) + (m_fftFrequencyDomain[i].imag() 
 										* m_fftFrequencyDomain[i].imag()));
 					double phase = atan2(m_fftFrequencyDomain[i].imag(), m_fftFrequencyDomain[i].real());
 					m_dphi[i][channel] = m_omega[i] + princeArg(phase - m_phi0[i][channel] - m_omega[i]);
@@ -326,6 +318,7 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
 			}
 
 		}
+
 		delete[] grain2;
 		delete[] grain3;
 		/*
@@ -342,6 +335,18 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
         curSampleVal = curMag; //the displayed power value on the GUI
 		*/
     }
+	// update state variabeles
+	m_inputBufferWritePosition = inputWritePosition;
+	m_outputBufferWritePosition = outputWritePosition;
+	m_outputBufferReadPosition = outputReadPosition;
+
+	// In case we have more outputs than inputs, this code clears any output
+	// channels that didn't contain input data, (because these aren't
+	// guaranteed to be empty - they may contain garbage).
+	for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+	{
+		buffer.clear(i, 0, buffer.getNumSamples());
+	}
 
 	m_fftSpinLock.exit();
 }
