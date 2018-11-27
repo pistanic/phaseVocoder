@@ -96,6 +96,20 @@ public:
     float curSampleVal;
    
 	private:
+		// Private member functions 
+		//void initFFT(int length);
+		//void deinitFFT();
+
+		void initWindow(int length, int windowType);
+		void deinitWindow();
+
+		void initSynthWindow(int length, int windowType);
+		void deinitSynthWindow();
+
+		void updateHopSize();
+		void updateScaleFactor();
+		
+		// Private member variables
 		int m_fftSize, m_hopSize;
 		int m_fftTransformSize; 
 		int m_samplesSinceFFT;
@@ -118,7 +132,9 @@ public:
 
 		// window buffer pointers
 		double * m_windowBufferPointer;
+		int m_windowBufferSize;
 		double * m_synthWindowBufferPointer;
+		int m_synthWindowBufferSize;
 
 		//Audio Buffer
 		AudioSampleBuffer m_inputBuffer, m_outputBuffer;

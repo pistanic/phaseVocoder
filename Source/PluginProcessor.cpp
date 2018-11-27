@@ -248,10 +248,106 @@ void phaseVocoAudioProcessor::setStateInformation (const void* data, int sizeInB
     // whose contents will have been created by the getStateInformation() call.
 }
 
+void phaseVocoAudioProcessor::initWindow(int length, int windowType)
+{
+	if (m_windowBufferPointer != 0)
+		deinitWindow();
+	if (length == 0)
+		return; 
+	m_windowBufferPointer = (double *)malloc(length * sizeof(double));
+
+	double windowLength = length; 
+
+	for (int i = 0; i < length; ++i)
+	{
+		switch (windowType)
+		{
+			case bart:
+				m_windowBufferPointer[i] = (2.0 / (windowLength + 2.0)) * (0.5*(windowLength + 2.0) - abs((double)i - 0.5*windowLength));
+				break;
+			case hann:
+				m_windowBufferPointer[i] = 0.5*(1.0 - cos(2.0*M_PI*(double)i / windowLength));
+				break;
+			case hamm:
+			default:
+				m_windowBufferPointer[i] = 0.54 - 0.46*cos(2.0*M_PI*(double)i / windowLength);
+				break;
+		}
+	}
+	m_windowBufferSize = length; 
+	updateScaleFactor();
+}
+
+void phaseVocoAudioProcessor::deinitWindow()
+{
+	if (m_windowBufferPointer == 0)
+		return;
+	m_fftSpinLock.enter();
+	m_windowBufferSize = 0;
+	m_fftSpinLock.exit();
+	free(m_windowBufferPointer);
+	m_windowBufferPointer = 0; 
+}
+
+void phaseVocoAudioProcessor::initSynthWindow(int length, int windowType)
+{
+	if (m_synthWindowBufferPointer != 0)
+		deinitWindow();
+	if (length == 0)
+		return;
+	m_synthWindowBufferPointer = (double *)malloc(length * sizeof(double));
+
+	double windowLength = length;
+
+	for (int i = 0; i < length; ++i)
+	{
+		switch (windowType)
+		{
+		case bart:
+			m_synthWindowBufferPointer[i] = (2.0 / (windowLength + 2.0)) * (0.5*(windowLength + 2.0) - abs((double)i - 0.5*windowLength));
+			break;
+		case hann:
+			m_synthWindowBufferPointer[i] = 0.5*(1.0 - cos(2.0*M_PI*(double)i / windowLength));
+			break;
+		case hamm:
+		default:
+			m_synthWindowBufferPointer[i] = 0.54 - 0.46*cos(2.0*M_PI*(double)i / windowLength);
+			break;
+		}
+	}
+	m_synthWindowBufferSize = length;
+	updateScaleFactor();
+
+}
+
+void phaseVocoAudioProcessor::deinitSynthWindow()
+{
+	if (m_synthWindowBufferPointer == 0)
+		return;
+	m_fftSpinLock.enter();
+	m_synthWindowBufferSize = 0;
+	m_fftSpinLock.exit();
+	free(m_synthWindowBufferPointer);
+	m_synthWindowBufferPointer = 0;
+}
+
+void phaseVocoAudioProcessor::updateHopSize()
+{
+
+}
+
+void phaseVocoAudioProcessor::updateScaleFactor()
+{
+
+}
+
+
 //==============================================================================
 // This creates new instances of the plugin..
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new phaseVocoAudioProcessor();
 }
+
+
 
