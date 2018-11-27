@@ -108,6 +108,10 @@ public:
 
 		void updateHopSize();
 		void updateScaleFactor();
+
+		void updatePitch();
+
+		double princeArg(double inputPhase);
 		
 		// Private member variables
 		int m_fftSize;
@@ -119,8 +123,8 @@ public:
 
 		int m_windowType, m_synthWindowSize;
 		
-		int m_pitchShift;
-		double m_pitchShiftValue, m_oneOverPitchShift; // compute 1/pitchShift for efficency.
+		int m_pitchShiftValue;
+		double m_pitchShift, m_oneOverPitchShift; // compute 1/pitchShift for efficency.
 		double m_ratio;
 		
 		// phase vectrors length 2*fftSize

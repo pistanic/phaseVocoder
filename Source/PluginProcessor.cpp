@@ -385,6 +385,58 @@ void phaseVocoAudioProcessor::updateScaleFactor()
 
 }
 
+void phaseVocoAudioProcessor::updatePitch()
+{
+	double oneOverTwelve = 1 / 12;
+	switch (m_pitchShiftValue)
+	{
+	case c :
+		m_pitchShift = 1.0;
+		break;
+	case cs :
+		m_pitchShift = pow(2.0, oneOverTwelve);
+		break;
+	case d :
+		m_pitchShift = pow(2.0, 2 * oneOverTwelve);
+		break;
+	case ds:
+		m_pitchShift = pow(2.0, 3 * oneOverTwelve);
+		break;
+	case e : 
+		m_pitchShift = pow(2.0, 4 * oneOverTwelve);
+		break;
+	case f:
+		m_pitchShift = pow(2.0, 5 * oneOverTwelve);
+		break;
+	case fs:
+		m_pitchShift = pow(2.0, 6 * oneOverTwelve);
+		break;
+	case g :
+		m_pitchShift = pow(2.0, 7 * oneOverTwelve);
+		break;
+	case gs :
+		m_pitchShift = pow(2.0, 8 * oneOverTwelve);
+		break;
+	case a:
+		m_pitchShift = pow(2.0, 9 * oneOverTwelve);
+		break;
+	case as:
+		m_pitchShift = pow(2.0, 10 * oneOverTwelve);
+		break;
+	case b :
+		m_pitchShift = pow(2.0, 11 * oneOverTwelve);
+		break; 
+	}
+}
+
+double phaseVocoAudioProcessor::princeArg(double inputPhase)
+{
+	if (inputPhase >= 0)
+		return fmod(inputPhase + M_PI, 2 * M_PI) - M_PI;
+	else
+		return fmod(inputPhase + M_PI, -2 * M_PI) + M_PI;
+}
+
 
 //==============================================================================
 // This creates new instances of the plugin..
