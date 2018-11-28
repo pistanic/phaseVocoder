@@ -30,37 +30,37 @@ phaseVocoAudioProcessor::phaseVocoAudioProcessor()
 {
 	
 	m_fftSize = 1024; 
+	m_hopSelectSize = eighthWindow;
+	m_windowType = hann;
+
+	m_pitchShift = c; // No shift
+	m_pitchShiftValue = 1.0;
+	m_oneOverPitchShift = 1.0;
+	m_ratio = 1.0;
+
+	m_synthWindowSize = 1024;
+	for (int i = 0; i < 2 * m_fftSize; ++i)
+	{
+		m_omega.push_back(0.25 * M_PI*i);
+	}
+
+	m_fftInit = false;
 	m_fftTransformSize = 0;
 	m_samplesSinceFFT = 0; 
 	m_fftScaleFactor = 0; 
 
-	m_hopSize = 128; // m_fftsize/8
-	m_hopSelectSize = eighthWindow;
-	m_windowType = hann;
-	m_windowBufferPointer = 0; 
-
-	m_synthWindowSize = 1024;
-	m_synthWindowBufferPointer = 0; 
-
-	m_pitchShift = c; // No shift
-	m_pitchShiftValue = 1.0;
-	m_oneOverPitchShift = 1.0; 
-
-	m_ratio = 1.0; 
-
-	for (int i = 0; i < 2*m_fftSize; ++i)
-	{
-		m_omega.push_back(0.25 * M_PI*i); 
-	}
-	
 	m_inputBufferSize = 1;
 	m_outputBufferSize = 1;
-
 	m_inputBufferWritePosition = 0;
-	m_outputBufferWritePosition = 0; 
-	m_outputBufferReadPosition = 0; 
+	m_outputBufferWritePosition = 0;
+	m_outputBufferReadPosition = 0;
 
-	m_fftInit = m_preparedToPlay = false;
+	m_hopSize = 128; // m_fftsize/8
+	m_windowBufferPointer = 0; 
+	m_synthWindowBufferPointer = 0; 
+
+
+	m_preparedToPlay = false;
 	
 	
 }
@@ -276,8 +276,8 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
 				// ~`* P H A S E V O C O C O *`~
 				for (int i = 0; i < m_fftTransformSize; ++i)
 				{
-					double amp = sqrt((m_fftFrequencyDomain[i].real() * m_fftFrequencyDomain[i].real()) + (m_fftFrequencyDomain[i].imag() 
-										* m_fftFrequencyDomain[i].imag()));
+					double amp = sqrt((m_fftFrequencyDomain[i].real() * m_fftFrequencyDomain[i].real()) + (m_fftFrequencyDomain[i].imag()
+						* m_fftFrequencyDomain[i].imag()) );
 					double phase = atan2(m_fftFrequencyDomain[i].imag(), m_fftFrequencyDomain[i].real());
 					m_dphi[i][channel] = m_omega[i] + princeArg(phase - m_phi0[i][channel] - m_omega[i]);
 					m_phi0[i][channel] = phase; // m_phi0 should be set to zero when params are changed before this point
@@ -287,7 +287,6 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
 					m_fftFrequencyDomain[i].imag(amp*sin(m_psi[i][channel]));
 
 				}
-
 				m_reverseFFT.perform(m_fftFrequencyDomain, m_fftTimeDomain, true);
 
 				// Interpolate
@@ -315,12 +314,11 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
 						outputBufferIndex = 0;
 				}
 				outputWritePosition = (outputWritePosition + m_hopSize) % m_outputBufferSize;
+						
 			}
 
 		}
 
-		delete[] grain2;
-		delete[] grain3;
 		/*
         //go through each frame for this callback
         for (int n = 0; n < buffer.getNumSamples(); ++n)
@@ -334,6 +332,8 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
         float curMag = buffer.getMagnitude(ch, 0, buffer.getNumSamples());
         curSampleVal = curMag; //the displayed power value on the GUI
 		*/
+		delete[] grain2;
+		delete[] grain3;
     }
 	// update state variabeles
 	m_inputBufferWritePosition = inputWritePosition;
@@ -524,27 +524,26 @@ void phaseVocoAudioProcessor::updateScaleFactor()
 	double windowSum = 0.0;
 
 	for (int i = 0; i < m_windowBufferSize; ++i)
-	{
 		windowSum += m_windowBufferPointer[i];
-	}
 
 	if (windowSum == 0.0)
-		m_fftScaleFactor = 0.0; 
+		m_fftScaleFactor = 0.0;  //mute output
+
 	else
 	{
 		switch (m_hopSelectSize)
 		{
 			case window : 
-				m_fftScaleFactor = 1.0 / (double)windowSum;
+				m_fftScaleFactor = 1;
 				break;
 			case halfWindow :
-				m_fftScaleFactor = 0.5 / (double)windowSum;
+				m_fftScaleFactor = 2;
 				break;
 			case quarterWindow :
-				m_fftScaleFactor = 0.25 / (double)windowSum;
+				m_fftScaleFactor = 4;
 				break;
 			case eighthWindow :
-				m_fftScaleFactor = 0.125 / (double)windowSum;
+				m_fftScaleFactor = 8; //what the fuck?
 				break;
 		}
 	}
