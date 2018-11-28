@@ -94,6 +94,9 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
     
     float curOutGain;
+	
+	int m_root, m_note0;
+
     float curSampleVal;
    
 	private:
