@@ -128,7 +128,7 @@ public:
 
 		int m_windowType, m_synthWindowSize;
 		
-		pitchShiftNote m_pitchShift;
+		int m_pitchShift;
 		double m_pitchShiftValue, m_oneOverPitchShift; // compute 1/pitchShift for efficency.
 		double m_ratio;
 		

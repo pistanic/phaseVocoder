@@ -33,7 +33,9 @@ phaseVocoAudioProcessor::phaseVocoAudioProcessor()
 	m_hopSelectSize = eighthWindow;
 	m_windowType = hann;
 
-	m_pitchShift = b; // c = No shift
+	m_pitchShift = c; 
+	m_note0 = c;
+	m_root = c; 
 	m_pitchShiftValue = 1.0;
 	m_oneOverPitchShift = 1.0;
 	m_ratio = 1.0;
@@ -188,6 +190,11 @@ bool phaseVocoAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts
 
 void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
+
+	//Caluclate semitone shift
+	m_pitchShift = m_note0 - m_root;
+	updatePitch();
+
     const int totalNumInputChannels  = getTotalNumInputChannels();
     const int totalNumOutputChannels = getTotalNumOutputChannels();
     
