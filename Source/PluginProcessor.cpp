@@ -190,11 +190,6 @@ bool phaseVocoAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts
 
 void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
-
-	//Caluclate semitone shift
-	m_pitchShift = m_note0 - m_root;
-	updatePitch();
-
     const int totalNumInputChannels  = getTotalNumInputChannels();
     const int totalNumOutputChannels = getTotalNumOutputChannels();
     
@@ -561,43 +556,45 @@ void phaseVocoAudioProcessor::updateScaleFactor()
 
 void phaseVocoAudioProcessor::updatePitch()
 {
+	m_pitchShift = m_note0 - m_root; // determine semi-tone shift
+
 	switch (m_pitchShift)
 	{
 	case c :
 		m_pitchShiftValue = 1.0;
 		break;
 	case cs :
-		m_pitchShiftValue = pow(2.0, (1 / 12));
+		m_pitchShiftValue = pow(2.0, (1.0 / 12.0));
 		break;
 	case d :
-		m_pitchShiftValue = pow(2.0, 2 * (1 / 12));
+		m_pitchShiftValue = pow(2.0, 2.0 * (1.0 / 12.0));
 		break;
 	case ds:
-		m_pitchShiftValue = pow(2.0, 3 * (1 / 12));
+		m_pitchShiftValue = pow(2.0, 3.0 * (1.0 / 12.0));
 		break;
 	case e : 
-		m_pitchShiftValue = pow(2.0, 4 * (1 / 12));
+		m_pitchShiftValue = pow(2.0, 4.0 * (1.0 / 12.0));
 		break;
 	case f:
-		m_pitchShiftValue = pow(2.0, 5 * (1 / 12));
+		m_pitchShiftValue = pow(2.0, 5.0 * (1.0 / 12.0));
 		break;
 	case fs:
-		m_pitchShiftValue = pow(2.0, 6 * (1 / 12));
+		m_pitchShiftValue = pow(2.0, 6.0 * (1.0 / 12.0));
 		break;
 	case g :
-		m_pitchShiftValue = pow(2.0, 7 * (1 / 12));
+		m_pitchShiftValue = pow(2.0, 7.0 * (1.0 / 12.0));
 		break;
 	case gs :
-		m_pitchShiftValue = pow(2.0, 8 * (1 / 12));
+		m_pitchShiftValue = pow(2.0, 8.0 * (1.0 / 12.0));
 		break;
 	case a:
-		m_pitchShiftValue = pow(2.0, 9 * (1 / 12));
+		m_pitchShiftValue = pow(2.0, 9.0 * (1.0 / 12.0));
 		break;
 	case as:
-		m_pitchShiftValue = pow(2.0, 10 * (1 / 12));
+		m_pitchShiftValue = pow(2.0, 10.0 * (1.0 / 12.0));
 		break;
 	case b :
-		m_pitchShiftValue = pow(2.0, 11 * (1 / 12));
+		m_pitchShiftValue = pow(2.0, 11.0 * (1.0 / 12.0));
 		break; 
 	}
 

@@ -93,6 +93,8 @@ public:
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
     
+	void updatePitch();
+
     float curOutGain;
 	
 	int m_root, m_note0;
@@ -113,8 +115,6 @@ public:
 
 		void updateHopSize();
 		void updateScaleFactor();
-
-		void updatePitch();
 
 		double princeArg(double inputPhase);
 		

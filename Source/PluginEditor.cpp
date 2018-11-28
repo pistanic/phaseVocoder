@@ -103,6 +103,7 @@ void phaseVocoAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox)
 	{
 		processor.m_note0 = comboBox->getSelectedItemIndex();
 	}
+	processor.updatePitch();
 }
 
 void phaseVocoAudioProcessorEditor::buttonClicked(Button* button)
