@@ -97,8 +97,8 @@ public:
 
     float curOutGain;
 	
-	int m_root, m_note0;
-	bool m_togState;
+	int m_root, m_note0, m_note1, m_note2, m_note3, m_note4, m_note5;
+	bool m_shiftUP;			//true to shift pitch up
 	   
     float curSampleVal;
    
