@@ -21,7 +21,7 @@
 
 //==============================================================================
 /***/
-class phaseVocoAudioProcessorEditor  : public AudioProcessorEditor, private Slider::Listener//, private Button::Listener, public Timer
+class phaseVocoAudioProcessorEditor  : public AudioProcessorEditor, private Slider::Listener, private ComboBox::Listener, private Button::Listener
 {
 public:
     phaseVocoAudioProcessorEditor (phaseVocoAudioProcessor&);
@@ -30,34 +30,33 @@ public:
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
-    
+	void calcRectAreas();
     void initSlider(Slider* slider, Slider::SliderStyle newStyle, juce::String newName,
                     Slider::TextEntryBoxPosition newTxtBoxPos, bool txtIsReadOnly,
                     juce::String newSuffix, double newMin, double newMax, double newInc, double newValue, bool addListener = true);
     
-    //void initButton(Button* btn, String btnName, int buttonGroup);
-    
 private:
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
     phaseVocoAudioProcessor& processor;
-    
-    //Add some sliders for parameters
-    Slider slOutGain; //slRatio, slThreshold, slInGain,slAtkTime, slRelTime, slLevel
-    
-    //ToggleButton btnPeak, btnRMS;
-    
-    //Slider callback function (from Slider::Listener)
+	
+	Rectangle<int> rectArea[12];
+	
+    Slider slOutGain;
+	Label labelGain;
+
+	ComboBox comBoxRoot;
+	Label	labelRoot;
+
+	ComboBox comBoxNote0;
+	Label	labelNote0;
+
+	ToggleButton togshiftupdown;
+	Label labTogButton;
+
     void sliderValueChanged(Slider* slider) override;
-    
-    //Button callback function
-    //void buttonClicked(Button* button) override;
-    
-    //Time to periodically update things on the GUI?
-    //void timerCallback() override;
-    
+	void comboBoxChanged(ComboBox* comboBox) override;
+	void buttonClicked(Button* button) override;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (phaseVocoAudioProcessorEditor)
 };
 
-
-#endif  // PLUGINEDITOR_H_INCLUDED
+#endif
