@@ -539,13 +539,13 @@ void phaseVocoAudioProcessor::updateScaleFactor()
 				m_fftScaleFactor = 1;
 				break;
 			case halfWindow :
-				m_fftScaleFactor = 2;
+				m_fftScaleFactor = 0.5;
 				break;
 			case quarterWindow :
-				m_fftScaleFactor = 4;
+				m_fftScaleFactor = 0.25;
 				break;
 			case eighthWindow :
-				m_fftScaleFactor = 8; //what the fuck?
+				m_fftScaleFactor = 0.125;
 				break;
 		}
 	}
