@@ -33,7 +33,7 @@ phaseVocoAudioProcessor::phaseVocoAudioProcessor()
 	m_hopSelectSize = eighthWindow;
 	m_windowType = hann;
 
-	m_pitchShift = c; // No shift
+	m_pitchShift = b; // c = No shift
 	m_pitchShiftValue = 1.0;
 	m_oneOverPitchShift = 1.0;
 	m_ratio = 1.0;
@@ -132,7 +132,7 @@ void phaseVocoAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
     // initialisation that you need..
 
 	//set reset phase information
-	/*
+	
 	for (int i = 0; i < 2048; ++i)
 	{
 		m_omega[i] = 2 * M_PI*i* m_hopSize / m_fftTransformSize;
@@ -143,7 +143,7 @@ void phaseVocoAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
 			m_psi[i][j] = 0; 
 		}
 	}
-	*/
+	
 	initFFT(m_fftSize);
 	initWindow(m_fftSize, m_windowType);
 	initSynthWindow(floor(m_fftSize*m_oneOverPitchShift), m_windowType);
@@ -279,8 +279,10 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
 					double amp = sqrt((m_fftFrequencyDomain[i].real() * m_fftFrequencyDomain[i].real()) + (m_fftFrequencyDomain[i].imag()
 						* m_fftFrequencyDomain[i].imag()) );
 					double phase = atan2(m_fftFrequencyDomain[i].imag(), m_fftFrequencyDomain[i].real());
+
 					m_dphi[i][channel] = m_omega[i] + princeArg(phase - m_phi0[i][channel] - m_omega[i]);
-					m_phi0[i][channel] = phase; // m_phi0 should be set to zero when params are changed before this point
+					
+					m_phi0[i][channel] = phase; 
 					m_psi[i][channel] = princeArg(m_psi[i][channel] + m_dphi[i][channel] * m_ratio);
 
 					m_fftFrequencyDomain[i].real(amp*cos(m_psi[i][channel]));
@@ -552,49 +554,48 @@ void phaseVocoAudioProcessor::updateScaleFactor()
 
 void phaseVocoAudioProcessor::updatePitch()
 {
-	double oneOverTwelve = 1 / 12;
-	switch (m_pitchShiftValue)
+	switch (m_pitchShift)
 	{
 	case c :
-		m_pitchShift = 1.0;
+		m_pitchShiftValue = 1.0;
 		break;
 	case cs :
-		m_pitchShift = pow(2.0, oneOverTwelve);
+		m_pitchShiftValue = pow(2.0, (1 / 12));
 		break;
 	case d :
-		m_pitchShift = pow(2.0, 2 * oneOverTwelve);
+		m_pitchShiftValue = pow(2.0, 2 * (1 / 12));
 		break;
 	case ds:
-		m_pitchShift = pow(2.0, 3 * oneOverTwelve);
+		m_pitchShiftValue = pow(2.0, 3 * (1 / 12));
 		break;
 	case e : 
-		m_pitchShift = pow(2.0, 4 * oneOverTwelve);
+		m_pitchShiftValue = pow(2.0, 4 * (1 / 12));
 		break;
 	case f:
-		m_pitchShift = pow(2.0, 5 * oneOverTwelve);
+		m_pitchShiftValue = pow(2.0, 5 * (1 / 12));
 		break;
 	case fs:
-		m_pitchShift = pow(2.0, 6 * oneOverTwelve);
+		m_pitchShiftValue = pow(2.0, 6 * (1 / 12));
 		break;
 	case g :
-		m_pitchShift = pow(2.0, 7 * oneOverTwelve);
+		m_pitchShiftValue = pow(2.0, 7 * (1 / 12));
 		break;
 	case gs :
-		m_pitchShift = pow(2.0, 8 * oneOverTwelve);
+		m_pitchShiftValue = pow(2.0, 8 * (1 / 12));
 		break;
 	case a:
-		m_pitchShift = pow(2.0, 9 * oneOverTwelve);
+		m_pitchShiftValue = pow(2.0, 9 * (1 / 12));
 		break;
 	case as:
-		m_pitchShift = pow(2.0, 10 * oneOverTwelve);
+		m_pitchShiftValue = pow(2.0, 10 * (1 / 12));
 		break;
 	case b :
-		m_pitchShift = pow(2.0, 11 * oneOverTwelve);
+		m_pitchShiftValue = pow(2.0, 11 * (1 / 12));
 		break; 
 	}
 
-	m_ratio = round(m_pitchShift*m_hopSize) / m_hopSize;
-	m_oneOverPitchShift = 1 / m_pitchShift;
+	m_ratio = round(m_pitchShiftValue*m_hopSize) / m_hopSize;
+	m_oneOverPitchShift = 1 / m_pitchShiftValue;
 
 }
 

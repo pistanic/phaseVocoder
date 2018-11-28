@@ -35,7 +35,7 @@ enum hopSize
 	eighthWindow
 };
 
-enum pitchShiftVal // One Octave with semitone difference
+enum pitchShiftNote // One Octave with semitone difference
 {
 	c = 0, 
 	cs,
@@ -124,8 +124,8 @@ public:
 
 		int m_windowType, m_synthWindowSize;
 		
-		int m_pitchShiftValue;
-		double m_pitchShift, m_oneOverPitchShift; // compute 1/pitchShift for efficency.
+		pitchShiftNote m_pitchShift;
+		double m_pitchShiftValue, m_oneOverPitchShift; // compute 1/pitchShift for efficency.
 		double m_ratio;
 		
 		// phase vectrors length 2*fftSize
