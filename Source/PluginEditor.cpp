@@ -98,12 +98,14 @@ void phaseVocoAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox)
 	if (comboBox == &comBoxRoot)
 	{
 		processor.m_root = comboBox->getSelectedItemIndex();
+		processor.updatePitch(processor.m_root, 0/*Voice index*/, processor.m_voiceParamsVector);
 	}
 	else if (comboBox == &comBoxNote0)
 	{
 		processor.m_note0 = comboBox->getSelectedItemIndex();
+		processor.updatePitch(processor.m_note0, 0/*Voice Index*/, processor.m_voiceParamsVector);
 	}
-	processor.updatePitch();
+	
 }
 
 void phaseVocoAudioProcessorEditor::buttonClicked(Button* button)

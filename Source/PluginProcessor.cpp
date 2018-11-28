@@ -34,11 +34,12 @@ phaseVocoAudioProcessor::phaseVocoAudioProcessor()
 	m_windowType = hann;
 
 	m_pitchShift = c; 
-	m_note0 = c;
+	m_note0 = m_note1 = m_note2 = m_note3 = m_note4 = m_note5 = c;
+	m_numVoicesScaleFactor = 0;
 	m_root = c; 
-	m_pitchShiftValue = 1.0;
-	m_oneOverPitchShift = 1.0;
-	m_ratio = 1.0;
+	//m_pitchShiftValue = 1.0;
+	//m_oneOverPitchShift = 1.0;
+	//m_ratio = 1.0;
 
 	m_synthWindowSize = 1024;
 	for (int i = 0; i < 2 * m_fftSize; ++i)
@@ -61,10 +62,16 @@ phaseVocoAudioProcessor::phaseVocoAudioProcessor()
 	m_windowBufferPointer = 0; 
 	m_synthWindowBufferPointer = 0; 
 
+	m_voiceParamsVector.reserve(6);
+
+	voiceParams emptyVoiceParams;
+
+	for (int i = 0; i < 6 /*Max Number of Voices*/; ++i)
+	{
+		m_voiceParamsVector.push_back(emptyVoiceParams);
+	}
 
 	m_preparedToPlay = false;
-	
-	
 }
 
 phaseVocoAudioProcessor::~phaseVocoAudioProcessor()
@@ -148,7 +155,7 @@ void phaseVocoAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
 	
 	initFFT(m_fftSize);
 	initWindow(m_fftSize, m_windowType);
-	initSynthWindow(floor(m_fftSize*m_oneOverPitchShift), m_windowType);
+	initSynthWindow(floor(m_fftSize*m_voiceParamsVector.at(0).oneOverPitchShift), m_windowType);
 
 	m_preparedToPlay = true; 
 }
@@ -215,12 +222,8 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
     //go through each channel for the current frame
     for (channel = 0; channel < totalNumInputChannels; ++channel)
     {
-		//int const k_fftTransformSize = 1024; // m_fftTransformSize;
-		//double const k_oneOverPitchShift = m_oneOverPitchShift;
-		//Prep resample variables
-
 		double* grain2 = new double[m_fftTransformSize + 1];
-		double* grain3 = new double[(int)floor(m_oneOverPitchShift*m_fftTransformSize)];
+		double* grain3 = new double[(int)floor(m_voiceParamsVector.at(0).oneOverPitchShift*m_fftTransformSize)];
 		double lx;
 		double x;
 		double dx;
@@ -276,6 +279,7 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
 				m_forwardFFT.perform(m_fftTimeDomain, m_fftFrequencyDomain, false);
 
 				// ~`* P H A S E V O C O C O *`~
+				
 				for (int i = 0; i < m_fftTransformSize; ++i)
 				{
 					double amp = sqrt((m_fftFrequencyDomain[i].real() * m_fftFrequencyDomain[i].real()) + (m_fftFrequencyDomain[i].imag()
@@ -285,20 +289,19 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
 					m_dphi[i][channel] = m_omega[i] + princeArg(phase - m_phi0[i][channel] - m_omega[i]);
 					
 					m_phi0[i][channel] = phase; 
-					m_psi[i][channel] = princeArg(m_psi[i][channel] + m_dphi[i][channel] * m_ratio);
+					m_psi[i][channel] = princeArg(m_psi[i][channel] + m_dphi[i][channel] * m_voiceParamsVector.at(0).ratio);
 
 					m_fftFrequencyDomain[i].real(amp*cos(m_psi[i][channel]));
 					m_fftFrequencyDomain[i].imag(amp*sin(m_psi[i][channel]));
 
 				}
 				m_reverseFFT.perform(m_fftFrequencyDomain, m_fftTimeDomain, true);
-
 				// Interpolate
 				for (int i = 0; i < m_fftTransformSize; ++i)
 					grain2[i] = m_fftTimeDomain[i].real();
-				for (int i = 0; i < floor(m_oneOverPitchShift*m_fftTransformSize); ++i)
+				for (int i = 0; i < floor(m_voiceParamsVector.at(0).oneOverPitchShift*m_fftTransformSize); ++i)
 				{
-					lx = floor(m_oneOverPitchShift*m_fftTransformSize);
+					lx = floor(m_voiceParamsVector.at(0).oneOverPitchShift*m_fftTransformSize);
 					x = i * m_fftTransformSize / lx;
 					ix = floor(x);
 					dx = x - (double)ix;
@@ -308,7 +311,7 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
 				int outputBufferIndex = outputWritePosition;
 				
 				// Synthesize
-				for (int fftBufferIndex = 0; fftBufferIndex < floor(m_oneOverPitchShift*m_fftTransformSize); ++fftBufferIndex)
+				for (int fftBufferIndex = 0; fftBufferIndex < floor(m_voiceParamsVector.at(0).oneOverPitchShift*m_fftTransformSize); ++fftBufferIndex)
 				{
 					if (fftBufferIndex > m_synthWindowBufferSize)
 						outputBufferData[outputBufferIndex] += 0;
@@ -323,19 +326,6 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
 
 		}
 
-		/*
-        //go through each frame for this callback
-        for (int n = 0; n < buffer.getNumSamples(); ++n)
-        {
-            //get the current sample's sign and absolute value
-            float curSample = buffer.getSample(ch, n);
-            buffer.setSample(ch, n, curSample * linOutGain);
-        }
-        
-        //calculate RMS after the fact and display it
-        float curMag = buffer.getMagnitude(ch, 0, buffer.getNumSamples());
-        curSampleVal = curMag; //the displayed power value on the GUI
-		*/
 		delete[] grain2;
 		delete[] grain3;
     }
@@ -400,7 +390,7 @@ void phaseVocoAudioProcessor::initFFT(int length)
 	m_outputBufferReadPosition = 0; 
 	
 	updateHopSize();
-	updatePitch();
+	updatePitch(m_note0, 0/*Voice Index*/, m_voiceParamsVector);
 
 	m_fftInit = true; 
 }
@@ -554,53 +544,56 @@ void phaseVocoAudioProcessor::updateScaleFactor()
 
 }
 
-void phaseVocoAudioProcessor::updatePitch()
+void phaseVocoAudioProcessor::updatePitch(int const note, int const voice, std::vector<voiceParams>& voiceParamsVector)
 {
-	m_pitchShift = m_note0 - m_root; // determine semi-tone shift
+	m_pitchShift = note - m_root; // determine semi-tone shift
+	
+	double pitchShiftValue;
 
 	switch (m_pitchShift)
 	{
 	case c :
-		m_pitchShiftValue = 1.0;
+		pitchShiftValue = 1.0;
 		break;
 	case cs :
-		m_pitchShiftValue = pow(2.0, (1.0 / 12.0));
+		pitchShiftValue = pow(2.0, (1.0 / 12.0));
 		break;
 	case d :
-		m_pitchShiftValue = pow(2.0, 2.0 * (1.0 / 12.0));
+		pitchShiftValue = pow(2.0, 2.0 * (1.0 / 12.0));
 		break;
 	case ds:
-		m_pitchShiftValue = pow(2.0, 3.0 * (1.0 / 12.0));
+		pitchShiftValue = pow(2.0, 3.0 * (1.0 / 12.0));
 		break;
 	case e : 
-		m_pitchShiftValue = pow(2.0, 4.0 * (1.0 / 12.0));
+		pitchShiftValue = pow(2.0, 4.0 * (1.0 / 12.0));
 		break;
 	case f:
-		m_pitchShiftValue = pow(2.0, 5.0 * (1.0 / 12.0));
+		pitchShiftValue = pow(2.0, 5.0 * (1.0 / 12.0));
 		break;
 	case fs:
-		m_pitchShiftValue = pow(2.0, 6.0 * (1.0 / 12.0));
+		pitchShiftValue = pow(2.0, 6.0 * (1.0 / 12.0));
 		break;
 	case g :
-		m_pitchShiftValue = pow(2.0, 7.0 * (1.0 / 12.0));
+		pitchShiftValue = pow(2.0, 7.0 * (1.0 / 12.0));
 		break;
 	case gs :
-		m_pitchShiftValue = pow(2.0, 8.0 * (1.0 / 12.0));
+		pitchShiftValue = pow(2.0, 8.0 * (1.0 / 12.0));
 		break;
 	case a:
-		m_pitchShiftValue = pow(2.0, 9.0 * (1.0 / 12.0));
+		pitchShiftValue = pow(2.0, 9.0 * (1.0 / 12.0));
 		break;
 	case as:
-		m_pitchShiftValue = pow(2.0, 10.0 * (1.0 / 12.0));
+		pitchShiftValue = pow(2.0, 10.0 * (1.0 / 12.0));
 		break;
 	case b :
-		m_pitchShiftValue = pow(2.0, 11.0 * (1.0 / 12.0));
+		pitchShiftValue = pow(2.0, 11.0 * (1.0 / 12.0));
 		break; 
 	}
 
-	m_ratio = round(m_pitchShiftValue*m_hopSize) / m_hopSize;
-	m_oneOverPitchShift = 1 / m_pitchShiftValue;
-
+	
+	voiceParamsVector.at(voice).pitchShiftValue = pitchShiftValue;
+	voiceParamsVector.at(voice).ratio = round(pitchShiftValue*m_hopSize) / m_hopSize;
+	voiceParamsVector.at(voice).oneOverPitchShift = 1 / pitchShiftValue;
 }
 
 double phaseVocoAudioProcessor::princeArg(double inputPhase)

@@ -93,16 +93,28 @@ public:
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
     
-	void updatePitch();
+	struct voiceParams
+	{
+		double ratio = 1.0;
+		double pitchShiftValue = 1.0;
+		double oneOverPitchShift = 1.0;
+		//double * grain3; 
+	};
+
+	void updatePitch(int const note, int const voice, std::vector<voiceParams>& voiceParamsVector);
+	
+	std::vector<voiceParams> m_voiceParamsVector;
 
     float curOutGain;
 	
-	int m_root, m_note0;
+	int m_root;
+	int m_note0, m_note1, m_note2, m_note3, m_note4, m_note5;
 	bool m_togState;
 	   
     float curSampleVal;
    
 	private:
+
 		// Private member functions 
 		void initFFT(int length);
 		void deinitFFT();
@@ -124,13 +136,14 @@ public:
 		int m_fftTransformSize; 
 		int m_samplesSinceFFT;
 
-		double m_fftScaleFactor; 
+		double m_fftScaleFactor;
+		int m_numVoicesScaleFactor;
 
 		int m_windowType, m_synthWindowSize;
 		
 		int m_pitchShift;
-		double m_pitchShiftValue, m_oneOverPitchShift; // compute 1/pitchShift for efficency.
-		double m_ratio;
+		//double m_pitchShiftValue, m_oneOverPitchShift; // compute 1/pitchShift for efficency.
+		//double m_ratio;
 		
 		// phase vectrors length 2*fftSize
 		std::vector<double> m_omega;
