@@ -21,7 +21,7 @@
 
 //==============================================================================
 /***/
-class phaseVocoAudioProcessorEditor  : public AudioProcessorEditor, private Slider::Listener, private ComboBox::Listener, private Button::Listener
+class phaseVocoAudioProcessorEditor  : public AudioProcessorEditor, private Slider::Listener, private ComboBox::Listener
 {
 public:
     phaseVocoAudioProcessorEditor (phaseVocoAudioProcessor&);
@@ -31,6 +31,7 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 	void calcRectAreas();
+	void makeVisibleNotes(int num);
     void initSlider(Slider* slider, Slider::SliderStyle newStyle, juce::String newName,
                     Slider::TextEntryBoxPosition newTxtBoxPos, bool txtIsReadOnly,
                     juce::String newSuffix, double newMin, double newMax, double newInc, double newValue, bool addListener = true);
@@ -43,18 +44,14 @@ private:
     Slider slOutGain;
 	Label labelGain;
 
-	ComboBox comBoxRoot;
-	Label	labelRoot;
+	ComboBox comBoxRoot, comBoxShiftDir, comBoxNumNotes;
+	Label	labelRoot, labelShiftDir, labelNumNotes;
 
-	ComboBox comBoxNote0;
-	Label	labelNote0;
-
-	ToggleButton togshiftupdown;
-	Label labTogButton;
+	ComboBox comBoxNote0, comBoxNote1, comBoxNote2, comBoxNote3, comBoxNote4, comBoxNote5;
+	Label	labelNote0, labelNote1, labelNote2, labelNote3, labelNote4, labelNote5;
 
     void sliderValueChanged(Slider* slider) override;
 	void comboBoxChanged(ComboBox* comboBox) override;
-	void buttonClicked(Button* button) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (phaseVocoAudioProcessorEditor)
 };
