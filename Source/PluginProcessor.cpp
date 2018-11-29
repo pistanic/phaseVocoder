@@ -222,12 +222,21 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
     //go through each channel for the current frame
     for (channel = 0; channel < totalNumInputChannels; ++channel)
     {
-		double* grain2 = new double[m_fftTransformSize + 1];
-		double* grain3 = new double[(int)floor(m_voiceParamsVector.at(0).oneOverPitchShift*m_fftTransformSize)];
-		double lx;
-		double x;
-		double dx;
-		int ix;
+		double** grain2 = new double*[6];
+		for (int i = 0; i < 6; ++i)
+			grain2[i] = new double[m_fftTransformSize + 1];
+
+		double** grain3 = new double*[6];
+		for (int i = 0; i < 6; ++i)
+			grain3[i] = new double[(int)floor(m_voiceParamsVector.at(i).oneOverPitchShift*m_fftTransformSize)];
+/*
+		double* grain0 = new double[(int)floor(m_voiceParamsVector.at(0).oneOverPitchShift*m_fftTransformSize)];
+		double* grain1 = new double[(int)floor(m_voiceParamsVector.at(1).oneOverPitchShift*m_fftTransformSize)];
+		double* grain2 = new double[(int)floor(m_voiceParamsVector.at(2).oneOverPitchShift*m_fftTransformSize)];
+		double* grain3 = new double[(int)floor(m_voiceParamsVector.at(3).oneOverPitchShift*m_fftTransformSize)];
+		double* grain4 = new double[(int)floor(m_voiceParamsVector.at(4).oneOverPitchShift*m_fftTransformSize)];
+		double* grain5 = new double[(int)floor(m_voiceParamsVector.at(5).oneOverPitchShift*m_fftTransformSize)];
+*/
 		
 		// Single channel input data
 		float* channelData = buffer.getWritePointer(channel);
@@ -254,72 +263,96 @@ void phaseVocoAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
 				inputWritePosition = 0;
 			if (++samplesSinceFFT >= m_hopSize)
 			{
-				samplesSinceFFT = 0; 
+				samplesSinceFFT = 0;
 
 				int inputBufferStartPosition = (inputWritePosition + m_inputBufferSize - m_fftTransformSize)
-													% m_inputBufferSize;
+					% m_inputBufferSize;
 
 				int inputBufferIndex = inputBufferStartPosition;
-				
+
 				// Set img to 0 real to window buffer
 				for (int fftBufferIndex = 0; fftBufferIndex < m_fftTransformSize; ++fftBufferIndex)
 				{
-					m_fftTimeDomain[fftBufferIndex].imag(0.0);
-					
+					m_fftTimeDomainPre[fftBufferIndex].imag(0.0);
+
 					if (fftBufferIndex >= m_windowBufferSize) // saftey check
-						m_fftTimeDomain[fftBufferIndex].real(0.0);
+						m_fftTimeDomainPre[fftBufferIndex].real(0.0);
 					else
-						m_fftTimeDomain[fftBufferIndex].real(m_windowBufferPointer[fftBufferIndex]
-																*inputBufferData[inputBufferIndex]);
+						m_fftTimeDomainPre[fftBufferIndex].real(m_windowBufferPointer[fftBufferIndex]
+							* inputBufferData[inputBufferIndex]);
 					++inputBufferIndex;
 					if (inputBufferIndex >= m_inputBufferSize)
-						inputBufferIndex = 0; 
+						inputBufferIndex = 0;
 				}
 				// take fft
-				m_forwardFFT.perform(m_fftTimeDomain, m_fftFrequencyDomain, false);
+
+				m_forwardFFT.perform(m_fftTimeDomainPre, m_fftFrequencyDomainPre, false);
 
 				// ~`* P H A S E V O C O C O *`~
-				
+
 				for (int i = 0; i < m_fftTransformSize; ++i)
 				{
-					double amp = sqrt((m_fftFrequencyDomain[i].real() * m_fftFrequencyDomain[i].real()) + (m_fftFrequencyDomain[i].imag()
-						* m_fftFrequencyDomain[i].imag()) );
-					double phase = atan2(m_fftFrequencyDomain[i].imag(), m_fftFrequencyDomain[i].real());
+					double amp = sqrt((m_fftFrequencyDomainPre[i].real() * m_fftFrequencyDomainPre[i].real()) + (m_fftFrequencyDomainPre[i].imag()
+						* m_fftFrequencyDomainPre[i].imag()));
+					double phase = atan2(m_fftFrequencyDomainPre[i].imag(), m_fftFrequencyDomainPre[i].real());
 
 					m_dphi[i][channel] = m_omega[i] + princeArg(phase - m_phi0[i][channel] - m_omega[i]);
-					
-					m_phi0[i][channel] = phase; 
+
+					m_phi0[i][channel] = phase;
+
+					for (int voice = 0; voice <= m_numberOfVoices; ++voice)
+					{
+
+						timeManipulation(i, channel, voice, amp);
+					}
+					/*
 					m_psi[i][channel] = princeArg(m_psi[i][channel] + m_dphi[i][channel] * m_voiceParamsVector.at(0).ratio);
 
 					m_fftFrequencyDomain[i].real(amp*cos(m_psi[i][channel]));
 					m_fftFrequencyDomain[i].imag(amp*sin(m_psi[i][channel]));
+					*/
+				}
+
+				for (int i = 0; i < m_numberOfVoices; ++i)
+				{
+					m_tempFreqDomain = m_fftFrequencyDomain[i];
+					m_tempTimeDomain = m_fftTimeDomain[i];
+
+					m_reverseFFT.perform(m_tempFreqDomain, m_tempTimeDomain, true);
 
 				}
-				m_reverseFFT.perform(m_fftFrequencyDomain, m_fftTimeDomain, true);
-				// Interpolate
-				for (int i = 0; i < m_fftTransformSize; ++i)
-					grain2[i] = m_fftTimeDomain[i].real();
-				for (int i = 0; i < floor(m_voiceParamsVector.at(0).oneOverPitchShift*m_fftTransformSize); ++i)
+				for (int voice = 0; voice < m_numberOfVoices; ++voice)
 				{
-					lx = floor(m_voiceParamsVector.at(0).oneOverPitchShift*m_fftTransformSize);
-					x = i * m_fftTransformSize / lx;
-					ix = floor(x);
-					dx = x - (double)ix;
-					grain3[i] = grain2[ix] * (1.0 - dx) + grain2[ix + 1] * dx;
+					double* tempg2 = grain2[voice];
+					double* tempg3 = grain3[voice];
+					interpolate(tempg2, tempg3, i, voice, m_fftTransformSize);
 				}
 
 				int outputBufferIndex = outputWritePosition;
 				
-				// Synthesize
-				for (int fftBufferIndex = 0; fftBufferIndex < floor(m_voiceParamsVector.at(0).oneOverPitchShift*m_fftTransformSize); ++fftBufferIndex)
+				for (int voice = 0; voice < m_numberOfVoices; voice++)
 				{
-					if (fftBufferIndex > m_synthWindowBufferSize)
-						outputBufferData[outputBufferIndex] += 0;
-					else
-						outputBufferData[outputBufferIndex] += grain3[fftBufferIndex] * m_fftScaleFactor * m_synthWindowBufferPointer[fftBufferIndex];
-					if (++outputBufferIndex >= m_outputBufferSize)
-						outputBufferIndex = 0;
+					double* tempg3 = grain3[voice];
+					synthesize(voice, tempg3, outputBufferIndex, channel);
 				}
+				
+				for (int fftBufferIndex = 0; fftBufferIndex < floor(m_voiceParamsVector.at(0).oneOverPitchShift*m_fftTransformSize); ++fftBufferIndex)
+					{
+						if (fftBufferIndex > m_synthWindowBufferSize)
+							outputBufferData[outputBufferIndex] += 0;
+						else
+						{
+							for (auto voiceBufferIter : m_voiceBuffers)
+							{
+								float* audioBufferPointer = voiceBufferIter.getWritePointer(jmin(channel, (m_inputBuffer.getNumChannels() - 1)));
+								outputBufferData[outputBufferIndex] += (1.0 / (double)m_numberOfVoices)*audioBufferPointer[outputBufferIndex];
+							}
+						}
+						if (++outputBufferIndex >= m_outputBufferSize)
+							outputBufferIndex = 0;
+					}
+
+
 				outputWritePosition = (outputWritePosition + m_hopSize) % m_outputBufferSize;
 						
 			}
@@ -537,7 +570,7 @@ void phaseVocoAudioProcessor::updateScaleFactor()
 				m_fftScaleFactor = 0.25;
 				break;
 			case eighthWindow :
-				m_fftScaleFactor = 0.125;
+				m_fftScaleFactor = 0.25;
 				break;
 		}
 	}
@@ -606,6 +639,70 @@ double phaseVocoAudioProcessor::princeArg(double inputPhase)
 		return fmod(inputPhase + M_PI, -2 * M_PI) + M_PI;
 }
 
+void phaseVocoAudioProcessor::interpolate(double* grain2, double* grain3, int i/*sample idx*/, int j/*voice idx*/, int m_fftTransformSize)
+{
+	for (int i = 0; i < m_fftTransformSize; ++i)
+		grain2[i] = m_fftTimeDomain[j][i].real();
+	for (int i = 0; i < floor(m_voiceParamsVector.at(j).oneOverPitchShift*m_fftTransformSize); ++i)
+	{
+		m_voiceParamsVector.at(j).lx = floor(m_voiceParamsVector.at(j).oneOverPitchShift*m_fftTransformSize);
+		m_voiceParamsVector.at(j).x = i * m_fftTransformSize / m_voiceParamsVector.at(j).lx;
+		m_voiceParamsVector.at(j).ix = floor(m_voiceParamsVector.at(j).x);
+		m_voiceParamsVector.at(j).dx = m_voiceParamsVector.at(j).x - (double)m_voiceParamsVector.at(j).ix;
+		grain3[i] = grain2[m_voiceParamsVector.at(j).ix] * (1.0 - m_voiceParamsVector.at(j).dx) + grain2[m_voiceParamsVector.at(j).ix + 1] * m_voiceParamsVector.at(j).dx;
+	}
+	/*// Interpolate
+
+for (int i = 0; i < m_fftTransformSize; ++i)
+	grain2[i] = m_fftTimeDomain[i].real();
+for (int i = 0; i < floor(m_voiceParamsVector.at(0).oneOverPitchShift*m_fftTransformSize); ++i)
+{
+	lx = floor(m_voiceParamsVector.at(0).oneOverPitchShift*m_fftTransformSize);
+	x = i * m_fftTransformSize / lx;
+	ix = floor(x);
+	dx = x - (double)ix;
+	grain3[i] = grain2[ix] * (1.0 - dx) + grain2[ix + 1] * dx;
+}
+*/
+}
+
+void phaseVocoAudioProcessor::synthesize(int voice, double* grain3, int outputBufferIndex, int channel)
+{
+	float* audioBufferPointer = m_voiceBuffers.at(voice).getWritePointer(jmin(channel, (m_inputBuffer.getNumChannels() - 1)));
+	for (int fftBufferIndex = 0; fftBufferIndex < floor(m_voiceParamsVector.at(voice).oneOverPitchShift*m_fftTransformSize); ++fftBufferIndex)
+	{
+		if (fftBufferIndex > m_synthWindowBufferSize)
+			audioBufferPointer[outputBufferIndex] += 0;
+		else
+			audioBufferPointer[outputBufferIndex] += grain3[fftBufferIndex] * m_fftScaleFactor * m_synthWindowBufferPointer[fftBufferIndex];
+		if (++outputBufferIndex >= m_outputBufferSize)
+			outputBufferIndex = 0;
+	}
+	/*
+// Synthesize
+for (int fftBufferIndex = 0; fftBufferIndex < floor(m_voiceParamsVector.at(0).oneOverPitchShift*m_fftTransformSize); ++fftBufferIndex)
+{
+	if (fftBufferIndex > m_synthWindowBufferSize)
+		outputBufferData[outputBufferIndex] += 0;
+	else
+		outputBufferData[outputBufferIndex] += grain3[fftBufferIndex] * m_fftScaleFactor * m_synthWindowBufferPointer[fftBufferIndex];
+	if (++outputBufferIndex >= m_outputBufferSize)
+		outputBufferIndex = 0;
+}
+*/
+}
+
+void phaseVocoAudioProcessor::timeManipulation(int i, int channel, int voice, double amp)
+{
+	m_psi[i][channel] = princeArg(m_psi[i][channel] + m_dphi[i][channel] * m_voiceParamsVector.at(voice).ratio);
+	
+	m_tempFreqDomain = m_fftFrequencyDomain[voice];
+
+	m_tempFreqDomain[i].real(amp*cos(m_psi[i][channel]));
+	m_tempFreqDomain[i].imag(amp*sin(m_psi[i][channel]));
+	
+}
+
 
 //==============================================================================
 // This creates new instances of the plugin..
@@ -613,6 +710,3 @@ AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new phaseVocoAudioProcessor();
 }
-
-
-

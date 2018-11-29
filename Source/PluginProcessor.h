@@ -98,7 +98,10 @@ public:
 		double ratio = 1.0;
 		double pitchShiftValue = 1.0;
 		double oneOverPitchShift = 1.0;
-		//double * grain3; 
+		double lx = 0.0;
+		double x = 0.0;
+		double dx = 0.0;
+		int ix = 0.0;
 	};
 
 	std::vector<voiceParams> m_voiceParamsVector;
@@ -109,6 +112,7 @@ public:
 	
 	int m_root, m_note0, m_note1, m_note2, m_note3, m_note4, m_note5;
 	bool m_shiftUP;			//true to shift pitch up
+	int m_numberOfVoices;
 	   
     float curSampleVal;
    
@@ -126,6 +130,10 @@ public:
 
 		void updateHopSize();
 		void updateScaleFactor();
+
+		void interpolate(double* grain2, double* grain3, int i/*sample idx*/, int j/*voice idx*/, int m_fftTransformSize);
+		void synthesize(int voice, double* grain3, int outputBufferIndex, int channel);
+		void timeManipulation(int i, int channel, int voice, double amp);
 
 		double princeArg(double inputPhase);
 		
@@ -160,6 +168,7 @@ public:
 
 		//Audio Buffer
 		AudioSampleBuffer m_inputBuffer, m_outputBuffer;
+		std::vector<AudioSampleBuffer> m_voiceBuffers; 
 
 		int m_inputBufferSize; 
 		int m_outputBufferSize;
@@ -168,8 +177,15 @@ public:
 		int m_outputBufferReadPosition; 
 
 		// fft arrays
-		dsp::Complex<float> m_fftTimeDomain[1024]; // fftTransformSize
-		dsp::Complex<float> m_fftFrequencyDomain[1024]; // fftTransformSize
+
+		dsp::Complex<float> m_fftTimeDomainPre[1024];
+		dsp::Complex<float> m_fftTimeDomain[6][1024]; // fftTransformSize
+
+		dsp::Complex<float> m_fftFrequencyDomainPre[1024]; // fftTransformSize
+		dsp::Complex<float> m_fftFrequencyDomain[6][1024]; // fftTransformSize
+
+		dsp::Complex<float> * m_tempTimeDomain;
+		dsp::Complex<float> * m_tempFreqDomain;
 
 		// fft classes
 		int const mk_fftOrder = 10;

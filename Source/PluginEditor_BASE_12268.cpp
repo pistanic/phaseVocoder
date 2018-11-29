@@ -24,21 +24,12 @@ phaseVocoAudioProcessorEditor::phaseVocoAudioProcessorEditor (phaseVocoAudioProc
 	labelGain.setText("Output Gain : ", dontSendNotification);
 	labelGain.attachToComponent(&slOutGain, false);
 
-	labelShiftDir.setText("Shift pitch up : ", dontSendNotification);
-	labelShiftDir.attachToComponent(&comBoxShiftDir, true);
-	comBoxShiftDir.addItemList({ "DOWN", "UP"}, 1);
-	comBoxShiftDir.setSelectedItemIndex(1, false);
-	comBoxShiftDir.setJustificationType(Justification::centred);
-	comBoxShiftDir.addListener(this);
-	addAndMakeVisible(comBoxShiftDir);
-
-	labelNumNotes.setText("Choose # of Notes : ", dontSendNotification);
-	labelNumNotes.attachToComponent(&comBoxNumNotes, false);
-	comBoxNumNotes.addItemList({ "1", "2", "3", "4", "5", "6"}, 1);
-	comBoxNumNotes.setSelectedItemIndex(0, false);
-	comBoxNumNotes.setJustificationType(Justification::centred);
-	comBoxNumNotes.addListener(this);
-	addAndMakeVisible(comBoxNumNotes);
+	addAndMakeVisible(togshiftupdown);
+	togshiftupdown.addListener(this);
+	togshiftupdown.setToggleState(true, dontSendNotification);
+	labTogButton.setText("Shift pitch up : ", dontSendNotification);
+	labTogButton.attachToComponent(&togshiftupdown, true);
+	
 
 	labelRoot.setText("Choose the Root Note : ", dontSendNotification);
 	labelRoot.attachToComponent(&comBoxRoot, false);
@@ -55,46 +46,6 @@ phaseVocoAudioProcessorEditor::phaseVocoAudioProcessorEditor (phaseVocoAudioProc
 	comBoxNote0.setJustificationType(Justification::centred);
 	comBoxNote0.addListener(this);
 	addAndMakeVisible(comBoxNote0);
-	
-	labelNote1.setText("Choose Note - 1 : ", dontSendNotification);
-	labelNote1.attachToComponent(&comBoxNote1, false);
-	comBoxNote1.addItemList({ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" }, 1);
-	comBoxNote1.setSelectedItemIndex(0, false);
-	comBoxNote1.setJustificationType(Justification::centred);
-	comBoxNote1.addListener(this);
-	addAndMakeVisible(comBoxNote1);
-	
-	labelNote2.setText("Choose Note - 3 : ", dontSendNotification);
-	labelNote2.attachToComponent(&comBoxNote2, false);
-	comBoxNote2.addItemList({ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" }, 1);
-	comBoxNote2.setSelectedItemIndex(0, false);
-	comBoxNote2.setJustificationType(Justification::centred);
-	comBoxNote2.addListener(this);
-	addAndMakeVisible(comBoxNote2);
-	
-	labelNote3.setText("Choose Note - 4 : ", dontSendNotification);
-	labelNote3.attachToComponent(&comBoxNote3, false);
-	comBoxNote3.addItemList({ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" }, 1);
-	comBoxNote3.setSelectedItemIndex(0, false);
-	comBoxNote3.setJustificationType(Justification::centred);
-	comBoxNote3.addListener(this);
-	addAndMakeVisible(comBoxNote3);
-	
-	labelNote4.setText("Choose Note - 5 : ", dontSendNotification);
-	labelNote4.attachToComponent(&comBoxNote4, false);
-	comBoxNote4.addItemList({ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" }, 1);
-	comBoxNote4.setSelectedItemIndex(0, false);
-	comBoxNote4.setJustificationType(Justification::centred);
-	comBoxNote4.addListener(this);
-	addAndMakeVisible(comBoxNote4);
-	
-	labelNote5.setText("Choose Note - 6 : ", dontSendNotification);
-	labelNote5.attachToComponent(&comBoxNote5, false);
-	comBoxNote5.addItemList({ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" }, 1);
-	comBoxNote5.setSelectedItemIndex(0, false);
-	comBoxNote5.setJustificationType(Justification::centred);
-	comBoxNote5.addListener(this);
-	addAndMakeVisible(comBoxNote5);
 
     //initButton(&btnPeak, "Peak", DETECTION_GROUP);]
     //btnPeak.triggerClick();    
@@ -121,16 +72,11 @@ void phaseVocoAudioProcessorEditor::resized()
 {
 	calcRectAreas();
     comBoxRoot.setBounds(rectArea[1]);
-    comBoxNumNotes.setBounds(rectArea[2]);
+    //comBoxnumNotes.setBounds(rectArea[2]);
     //comBoxPreset.setBounds(rectArea[3]);
 	slOutGain.setBounds(rectArea[10]);
     comBoxNote0.setBounds(rectArea[4]);
-    comBoxNote1.setBounds(rectArea[5]);
-    comBoxNote2.setBounds(rectArea[6]);
-    comBoxNote3.setBounds(rectArea[7]);
-    comBoxNote4.setBounds(rectArea[8]);
-    comBoxNote5.setBounds(rectArea[9]);
-	comBoxShiftDir.setBounds(rectArea[11]);
+	togshiftupdown.setBounds(rectArea[11]);
 }
 
 void phaseVocoAudioProcessorEditor::sliderValueChanged(Slider* slider)
@@ -148,57 +94,30 @@ void phaseVocoAudioProcessorEditor::sliderValueChanged(Slider* slider)
 }
 
 void phaseVocoAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox)
-{
+{	
 	if (comboBox == &comBoxRoot)
 	{
 		processor.m_root = comboBox->getSelectedItemIndex();
-		for (int i = 0; i < processor.m_numberOfVoices; ++i)
-			processor.updatePitch(processor.m_root, i/*Voice index*/, processor.m_voiceParamsVector);
 	}
 	else if (comboBox == &comBoxNote0)
 	{
 		processor.m_note0 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note0, 0/*Voice Index*/, processor.m_voiceParamsVector);
 	}
-	else if (comboBox == &comBoxNote1)
-	{
-		processor.m_note1 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note1, 1/*Voice Index*/, processor.m_voiceParamsVector);
-	}
-	else if (comboBox == &comBoxNote2)
-	{
-		processor.m_note2 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note1, 2/*Voice Index*/, processor.m_voiceParamsVector);
-	}
-	else if (comboBox == &comBoxNote3)
-	{
-		processor.m_note3 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note1, 3/*Voice Index*/, processor.m_voiceParamsVector);
-	}
-	else if (comboBox == &comBoxNote4)
-	{
-		processor.m_note4 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note1, 4/*Voice Index*/, processor.m_voiceParamsVector);
-	}
-	else if (comboBox == &comBoxNote5)
-	{
-		processor.m_note5 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note1, 5/*Voice Index*/, processor.m_voiceParamsVector);
-	}
-	else if (comboBox == &comBoxNumNotes)
-	{
-		makeVisibleNotes(comboBox->getSelectedItemIndex());
-		processor.m_numberOfVoices = comboBox->getSelectedItemIndex();
-	}
-	else if (comboBox == &comBoxShiftDir)
-	{
-		if (comboBox->getSelectedItemIndex() == 0)
-			processor.m_shiftUP = false;
-		else if(comboBox->getSelectedItemIndex() == 1)
-			processor.m_shiftUP = true;
-	}
-
+	processor.updatePitch();
 }
+
+void phaseVocoAudioProcessorEditor::buttonClicked(Button* button)
+{
+	if (button == &togshiftupdown)
+	{
+		processor.m_togState = button->getToggleState();
+	}    
+}
+
+//void phaseVocoAudioProcessorEditor::timerCallback()
+//{
+//    slLevel.setValue(processor.curSampleVal);
+//}
 
 //initialize a slider with many parameters
 void phaseVocoAudioProcessorEditor::initSlider(Slider* slider, Slider::SliderStyle newStyle, juce::String newName,
@@ -224,6 +143,17 @@ void phaseVocoAudioProcessorEditor::initSlider(Slider* slider, Slider::SliderSty
         slider->addListener(this);
     }    
 }
+
+//void phaseVocoAudioProcessorEditor::initButton(Button* btn, String btnName, int buttonGroup)
+//{
+//    addAndMakeVisible(btn);
+//    btn->addListener(this);
+//    btn->setButtonText(btnName);
+//    btn->setName(btnName);
+//    btn->setColour(ToggleButton::textColourId, Colours::white);
+//    btn->setColour(ToggleButton::tickColourId, Colours::deepskyblue);
+//    btn->setRadioGroupId(buttonGroup);
+//}
 
 void phaseVocoAudioProcessorEditor::calcRectAreas()
 {
@@ -275,59 +205,4 @@ void phaseVocoAudioProcessorEditor::calcRectAreas()
 	rectArea[9] = rectArea[9].removeFromBottom(rectArea[9].getHeight() * 8 / 10);
 	rectArea[9] = rectArea[9].removeFromTop(rectArea[9].getHeight() * 9 / 10);
 
-}
-
-void phaseVocoAudioProcessorEditor::makeVisibleNotes(int num)
-{
-	switch(num)
-	{
-		case 0:
-			comBoxNote0.setVisible(true);
-			comBoxNote1.setVisible(false);
-			comBoxNote2.setVisible(false);
-			comBoxNote3.setVisible(false);
-			comBoxNote4.setVisible(false);
-			comBoxNote5.setVisible(false);
-			break;
-		case 1:
-			comBoxNote0.setVisible(true);
-			comBoxNote1.setVisible(true);
-			comBoxNote2.setVisible(false);
-			comBoxNote3.setVisible(false);
-			comBoxNote4.setVisible(false);
-			comBoxNote5.setVisible(false);
-			break;
-		case 2:
-			comBoxNote0.setVisible(true);
-			comBoxNote1.setVisible(true);
-			comBoxNote2.setVisible(true);
-			comBoxNote3.setVisible(false);
-			comBoxNote4.setVisible(false);
-			comBoxNote5.setVisible(false);
-			break;
-		case 3:
-			comBoxNote0.setVisible(true);
-			comBoxNote1.setVisible(true);
-			comBoxNote2.setVisible(true);
-			comBoxNote3.setVisible(true);
-			comBoxNote4.setVisible(false);
-			comBoxNote5.setVisible(false);
-			break;
-		case 4:
-			comBoxNote0.setVisible(true);
-			comBoxNote1.setVisible(true);
-			comBoxNote2.setVisible(true);
-			comBoxNote3.setVisible(true);
-			comBoxNote4.setVisible(true);
-			comBoxNote5.setVisible(false);
-			break;
-		case 5:
-			comBoxNote0.setVisible(true);
-			comBoxNote1.setVisible(true);
-			comBoxNote2.setVisible(true);
-			comBoxNote3.setVisible(true);
-			comBoxNote4.setVisible(true);
-			comBoxNote5.setVisible(true);
-			break;
-	}
 }

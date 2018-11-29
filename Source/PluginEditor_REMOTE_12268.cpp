@@ -152,43 +152,34 @@ void phaseVocoAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox)
 	if (comboBox == &comBoxRoot)
 	{
 		processor.m_root = comboBox->getSelectedItemIndex();
-		for (int i = 0; i < processor.m_numberOfVoices; ++i)
-			processor.updatePitch(processor.m_root, i/*Voice index*/, processor.m_voiceParamsVector);
 	}
 	else if (comboBox == &comBoxNote0)
 	{
 		processor.m_note0 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note0, 0/*Voice Index*/, processor.m_voiceParamsVector);
 	}
 	else if (comboBox == &comBoxNote1)
 	{
 		processor.m_note1 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note1, 1/*Voice Index*/, processor.m_voiceParamsVector);
 	}
 	else if (comboBox == &comBoxNote2)
 	{
 		processor.m_note2 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note1, 2/*Voice Index*/, processor.m_voiceParamsVector);
 	}
 	else if (comboBox == &comBoxNote3)
 	{
 		processor.m_note3 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note1, 3/*Voice Index*/, processor.m_voiceParamsVector);
 	}
 	else if (comboBox == &comBoxNote4)
 	{
 		processor.m_note4 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note1, 4/*Voice Index*/, processor.m_voiceParamsVector);
 	}
 	else if (comboBox == &comBoxNote5)
 	{
 		processor.m_note5 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note1, 5/*Voice Index*/, processor.m_voiceParamsVector);
 	}
 	else if (comboBox == &comBoxNumNotes)
 	{
 		makeVisibleNotes(comboBox->getSelectedItemIndex());
-		processor.m_numberOfVoices = comboBox->getSelectedItemIndex();
 	}
 	else if (comboBox == &comBoxShiftDir)
 	{
@@ -198,6 +189,7 @@ void phaseVocoAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox)
 			processor.m_shiftUP = true;
 	}
 
+	processor.updatePitch();
 }
 
 //initialize a slider with many parameters
@@ -330,4 +322,10 @@ void phaseVocoAudioProcessorEditor::makeVisibleNotes(int num)
 			comBoxNote5.setVisible(true);
 			break;
 	}
+	comBoxNote0.setSelectedItemIndex(0, false);
+	comBoxNote1.setSelectedItemIndex(0, false);
+	comBoxNote2.setSelectedItemIndex(0, false);
+	comBoxNote3.setSelectedItemIndex(0, false);
+	comBoxNote4.setSelectedItemIndex(0, false);
+	comBoxNote5.setSelectedItemIndex(0, false);
 }
