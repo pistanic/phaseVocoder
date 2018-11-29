@@ -106,7 +106,7 @@ public:
 
 	std::vector<voiceParams> m_voiceParamsVector;
 
-	void updatePitch(int const note, int const voice, std::vector<voiceParams>& voiceParamsVector);
+	void updatePitch(int const note, int const voice);
 
     float curOutGain;
 	

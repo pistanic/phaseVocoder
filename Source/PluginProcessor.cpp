@@ -577,7 +577,7 @@ void phaseVocoAudioProcessor::updateScaleFactor()
 
 }
 
-void phaseVocoAudioProcessor::updatePitch(int const note, int const voice, std::vector<voiceParams>& voiceParamsVector)
+void phaseVocoAudioProcessor::updatePitch(int const note, int const voice)
 {
 	double pitchShiftValueTemp;
 	double shiftDirection = 1.0;

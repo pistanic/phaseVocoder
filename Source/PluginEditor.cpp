@@ -153,37 +153,37 @@ void phaseVocoAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox)
 	{
 		processor.m_root = comboBox->getSelectedItemIndex();
 		for (int i = 0; i < processor.m_numberOfVoices; ++i)
-			processor.updatePitch(processor.m_root, i/*Voice index*/, processor.m_voiceParamsVector);
+			processor.updatePitch(processor.m_root, i/*Voice index*/);
 	}
 	else if (comboBox == &comBoxNote0)
 	{
 		processor.m_note0 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note0, 0/*Voice Index*/, processor.m_voiceParamsVector);
+		processor.updatePitch(processor.m_note0, 0/*Voice Index*/);
 	}
 	else if (comboBox == &comBoxNote1)
 	{
 		processor.m_note1 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note1, 1/*Voice Index*/, processor.m_voiceParamsVector);
+		processor.updatePitch(processor.m_note1, 1/*Voice Index*/);
 	}
 	else if (comboBox == &comBoxNote2)
 	{
 		processor.m_note2 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note1, 2/*Voice Index*/, processor.m_voiceParamsVector);
+		processor.updatePitch(processor.m_note1, 2/*Voice Index*/);
 	}
 	else if (comboBox == &comBoxNote3)
 	{
 		processor.m_note3 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note1, 3/*Voice Index*/, processor.m_voiceParamsVector);
+		processor.updatePitch(processor.m_note1, 3/*Voice Index*/);
 	}
 	else if (comboBox == &comBoxNote4)
 	{
 		processor.m_note4 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note1, 4/*Voice Index*/, processor.m_voiceParamsVector);
+		processor.updatePitch(processor.m_note1, 4/*Voice Index*/);
 	}
 	else if (comboBox == &comBoxNote5)
 	{
 		processor.m_note5 = comboBox->getSelectedItemIndex();
-		processor.updatePitch(processor.m_note1, 5/*Voice Index*/, processor.m_voiceParamsVector);
+		processor.updatePitch(processor.m_note1, 5/*Voice Index*/);
 	}
 	else if (comboBox == &comBoxNumNotes)
 	{
