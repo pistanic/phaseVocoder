@@ -191,7 +191,6 @@ void phaseVocoAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox)
 			processor.m_shiftUP = true;
 	}
 
-	processor.updatePitch();
 }
 
 //initialize a slider with many parameters

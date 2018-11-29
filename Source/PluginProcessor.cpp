@@ -546,54 +546,56 @@ void phaseVocoAudioProcessor::updateScaleFactor()
 
 void phaseVocoAudioProcessor::updatePitch(int const note, int const voice, std::vector<voiceParams>& voiceParamsVector)
 {
+	double pitchShiftValueTemp;
+	double shiftDirection = 1.0;
 	m_pitchShift = note - m_root; // determine semi-tone shift
-	
-	double pitchShiftValue;
+
+	if (!m_shiftUP)
+		shiftDirection = -1.0;
 
 	switch (m_pitchShift)
 	{
 	case c :
-		pitchShiftValue = 1.0;
+		pitchShiftValueTemp = 1.0;
 		break;
 	case cs :
-		pitchShiftValue = pow(2.0, (1.0 / 12.0));
+		pitchShiftValueTemp = pow(2.0, (1.0 / 12.0)*shiftDirection);
 		break;
 	case d :
-		pitchShiftValue = pow(2.0, 2.0 * (1.0 / 12.0));
+		pitchShiftValueTemp = pow(2.0, 2.0 * (1.0 / 12.0)*shiftDirection);
 		break;
 	case ds:
-		pitchShiftValue = pow(2.0, 3.0 * (1.0 / 12.0));
+		pitchShiftValueTemp = pow(2.0, 3.0 * (1.0 / 12.0)*shiftDirection);
 		break;
 	case e : 
-		pitchShiftValue = pow(2.0, 4.0 * (1.0 / 12.0));
+		pitchShiftValueTemp = pow(2.0, 4.0 * (1.0 / 12.0)*shiftDirection);
 		break;
 	case f:
-		pitchShiftValue = pow(2.0, 5.0 * (1.0 / 12.0));
+		pitchShiftValueTemp = pow(2.0, 5.0 * (1.0 / 12.0)*shiftDirection);
 		break;
 	case fs:
-		pitchShiftValue = pow(2.0, 6.0 * (1.0 / 12.0));
+		pitchShiftValueTemp = pow(2.0, 6.0 * (1.0 / 12.0)*shiftDirection);
 		break;
 	case g :
-		pitchShiftValue = pow(2.0, 7.0 * (1.0 / 12.0));
+		pitchShiftValueTemp = pow(2.0, 7.0 * (1.0 / 12.0)*shiftDirection);
 		break;
 	case gs :
-		pitchShiftValue = pow(2.0, 8.0 * (1.0 / 12.0));
+		pitchShiftValueTemp = pow(2.0, 8.0 * (1.0 / 12.0)*shiftDirection);
 		break;
 	case a:
-		pitchShiftValue = pow(2.0, 9.0 * (1.0 / 12.0));
+		pitchShiftValueTemp = pow(2.0, 9.0 * (1.0 / 12.0)*shiftDirection);
 		break;
 	case as:
-		pitchShiftValue = pow(2.0, 10.0 * (1.0 / 12.0));
+		pitchShiftValueTemp = pow(2.0, 10.0 * (1.0 / 12.0)*shiftDirection);
 		break;
 	case b :
-		pitchShiftValue = pow(2.0, 11.0 * (1.0 / 12.0));
+		pitchShiftValueTemp = pow(2.0, 11.0 * (1.0 / 12.0)*shiftDirection);
 		break; 
 	}
 
-	
-	voiceParamsVector.at(voice).pitchShiftValue = pitchShiftValue;
-	voiceParamsVector.at(voice).ratio = round(pitchShiftValue*m_hopSize) / m_hopSize;
-	voiceParamsVector.at(voice).oneOverPitchShift = 1 / pitchShiftValue;
+	voiceParamsVector.at(voice).pitchShiftValue = pitchShiftValueTemp;
+	voiceParamsVector.at(voice).ratio = round(pitchShiftValueTemp*m_hopSize) / m_hopSize;
+	voiceParamsVector.at(voice).oneOverPitchShift = 1.0 / pitchShiftValueTemp;
 }
 
 double phaseVocoAudioProcessor::princeArg(double inputPhase)

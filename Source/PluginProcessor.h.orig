@@ -101,14 +101,20 @@ public:
 		//double * grain3; 
 	};
 
-	std::vector<voiceParams> m_voiceParamsVector;
-
 	void updatePitch(int const note, int const voice, std::vector<voiceParams>& voiceParamsVector);
+	
+	std::vector<voiceParams> m_voiceParamsVector;
 
     float curOutGain;
 	
+<<<<<<< HEAD
+	int m_root;
+	int m_note0, m_note1, m_note2, m_note3, m_note4, m_note5;
+	bool m_togState;
+=======
 	int m_root, m_note0, m_note1, m_note2, m_note3, m_note4, m_note5;
 	bool m_shiftUP;			//true to shift pitch up
+>>>>>>> editor
 	   
     float curSampleVal;
    
