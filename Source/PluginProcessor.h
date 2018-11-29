@@ -133,7 +133,7 @@ public:
 
 		void interpolate(double* grain2, double* grain3, int i/*sample idx*/, int j/*voice idx*/, int m_fftTransformSize);
 		void synthesize(int voice, double* grain3, int outputBufferIndex, int channel);
-		void timeManipulation(int i, int channel, int voice, double amp);
+		void timeManipulation(int i, int channel, dsp::Complex<float>* freqDomainArray,int voice, double amp);
 
 		double princeArg(double inputPhase);
 		
@@ -184,8 +184,7 @@ public:
 		dsp::Complex<float> m_fftFrequencyDomainPre[1024]; // fftTransformSize
 		dsp::Complex<float> m_fftFrequencyDomain[6][1024]; // fftTransformSize
 
-		dsp::Complex<float> * m_tempTimeDomain;
-		dsp::Complex<float> * m_tempFreqDomain;
+
 
 		// fft classes
 		int const mk_fftOrder = 10;
